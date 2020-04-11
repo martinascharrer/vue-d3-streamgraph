@@ -1,49 +1,24 @@
 <template>
   <div class="vue-stream-graph">
-    <info-box
-      v-if="infobox.isVisible"
-      :x="infobox.x"
-      :y="infobox.y"
-      :title="infobox.title"
-      :text="infobox.text"
-      :entries="infobox.entries"
-    />
     <svg
       :width="layout.width"
       :height="layout.height"
-      @mousemove="ActivateInfobox"
-      @mouseleave="DeactivateInfobox"
+      @mousemove="mouseMoved"
+      @mouseleave="$emit('mouseLeft')"
     >
       <transition-group tag="g" name="fade">
         <path-area
-          v-for="(d, key) in stackedData"
-          :key="key"
+          v-for="d in stackedData"
+          :key="d.key"
           :data="d"
           :layout="layout"
           :scales="{x:scaleX, y:scaleY}"
-          :color="color(key)"
-          @clicked="activateSelected(key)"
-          :isActive="selected.name == key"
+          :color="color(d.key)"
         />
       </transition-group>
       <x-selector :data="selectorData" />
       <axes-left-bottom :scale="{x:scaleX, y:scaleY}" :layout="layout" />
     </svg>
-    <div>
-      <h2>{{infobox.title}}</h2>
-      <div
-        v-if="selected.isVisible"
-        :style="{border: `3px solid ${selected.color}`}"
-        class="selectedContainer"
-      >
-        <h3>{{selected.name}}</h3>
-        <p>highest: {{selected.allTimeHigh}}</p>
-        <p>lowest: {{selected.allTimeLow}}</p>
-      </div>
-      <p v-else class="selectedContainer">
-        <em>Select one of the areas for more information.</em>
-      </p>
-    </div>
   </div>
 </template>
 
@@ -57,10 +32,9 @@ import {
   scaleLinear as d3ScaleLinear,
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
-import PathArea from "./atoms/PathAreaClickable.vue";
-import InfoBox from "./atoms/InfoBox.vue";
-import AxesLeftBottom from "./molecules/AxesLeftBottom.vue";
-import XSelector from "./atoms/XSelector";
+import PathArea from "../atoms/PathArea.vue";
+import AxesLeftBottom from "../molecules/AxesLeftBottom.vue";
+import XSelector from "../atoms/XSelector";
 
 export default {
   name: "StreamGraph",
@@ -80,32 +54,17 @@ export default {
   data: function() {
     return {
       stackedData: null,
-      infobox: {
-        title: "title",
-        x: 0,
-        y: 0,
-        isVisible: false,
-        entries: null
-      },
       selectorData: [
         { x: this.layout.margin.left, y: this.layout.margin.top },
         {
           x: this.layout.margin.left,
           y: this.layout.height - this.layout.margin.bottom
         }
-      ],
-      selected: {
-        isVisible: false,
-        name: "",
-        allTimeHigh: 10,
-        allTimeLow: 0,
-        color: "#222"
-      }
+      ]
     };
   },
   components: {
     PathArea,
-    InfoBox,
     AxesLeftBottom,
     XSelector
   },
@@ -124,7 +83,7 @@ export default {
       );
     },
     xValues() {
-      return this.origData.map(d => d.year);
+      return this.origData.map(d => d.time);
     },
     xMin() {
       return Math.min(...this.xValues);
@@ -134,12 +93,14 @@ export default {
     },
     yValues() {
       let yValues = [];
-      Object.keys(this.stackedData).forEach(key => {
-        this.stackedData[key].forEach(element => {
-          yValues.push(element.y0);
-          yValues.push(element.y1);
+      if (this.stackedData != null) {
+        Object.keys(this.stackedData).forEach(key => {
+          this.stackedData[key].forEach(element => {
+            yValues.push(element[0]);
+            yValues.push(element[1]);
+          });
         });
-      });
+      }
       return yValues;
     },
     yMax() {
@@ -178,7 +139,6 @@ export default {
   watch: {
     origData() {
       this.stackedData = this.getStackedData();
-      this.init();
     },
     stackOffset() {
       this.stackedData = this.getStackedData();
@@ -191,67 +151,21 @@ export default {
         .offset(this.stackOffset)
         .keys(this.keys)(this.origData);
 
-      // reorder data for the path-area component
-      let orderedData = {};
-      stackedData.forEach(element => {
-        let personData = [];
-        element.forEach(d => {
-          personData.push({ x: d.data.year, y0: d[0], y1: d[1] });
-        });
-        orderedData[element.key] = personData;
-      });
-
-      return orderedData;
+      return stackedData;
     },
-    DeactivateInfobox() {
-      this.infobox.isVisible = false;
-    },
-    ActivateInfobox(event) {
+    mouseMoved(event) {
       // find the closestPoint
       let closestPoint = this.getClosestPoint(event.offsetX + 15);
 
-      // get the data of the closest point
-      let data;
+      let closestPointData;
       this.origData.forEach(d => {
-        if (d.year == closestPoint.year) {
-          data = d;
+        if (d.time == closestPoint.time) {
+          closestPointData = d;
         }
       });
 
       this.updateSelector(closestPoint);
-      this.updateInfoBox(data, event);
-    },
-    activateSelected(key) {
-      let diffValues = [];
-      let data = this.stackedData[key];
-      data.forEach(element => {
-        diffValues.push(element.y1 - element.y0);
-      });
-      this.selected.isVisible = true;
-      this.selected.allTimeHigh = Math.max(...diffValues);
-      this.selected.allTimeLow = Math.min(...diffValues);
-      this.selected.name = key;
-      this.selected.color = this.color(key);
-    },
-    updateInfoBox(data, event) {
-      // update the infobox
-      this.infobox.entries = [];
-      let columns = this.origData.columns;
-      let total = 0;
-      for (let i = 1; i < columns.length; i++) {
-        total += +data[columns[i]]; // calc total, + to convert from string to number
-        // push the list-entries
-        this.infobox.entries.push({
-          label: columns[i],
-          value: data[columns[i]],
-          color: this.color(columns[i])
-        });
-      }
-      this.infobox.text = "Total: " + total;
-      this.infobox.title = data.year;
-      this.infobox.x = event.clientX;
-      this.infobox.y = event.offsetY;
-      this.infobox.isVisible = true;
+      this.$emit('mousemoved', closestPointData, event);
     },
     updateSelector(closestPoint) {
       this.selectorData = [
@@ -267,13 +181,10 @@ export default {
         .map(data => ({
           x: this.scaleX(data),
           diff: Math.abs(this.scaleX(data) - x),
-          year: data
+          time: data
         }))
         .reduce((memo, val) => (memo.diff < val.diff ? memo : val));
       return value;
-    },
-    init() {
-      this.selected.isVisible = false;
     }
   }
 };

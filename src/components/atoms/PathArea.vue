@@ -1,5 +1,5 @@
 <template>
-  <path :d="d" :fill="color"></path>
+  <path :d="d" :fill="color" @click="$emit('clicked')" :class="{active : isActive}"></path>
 </template>
 
 <script>
@@ -18,6 +18,11 @@ export default {
     color: {
       type: String,
       default: () => "#000000"
+    },
+    isActive:{
+      type:Boolean,
+      required:false,
+      default: false
     }
   },
   computed: {
@@ -25,7 +30,7 @@ export default {
       let scales = this.scales;
       let area = d3Area()
         .x(function(d) {
-          return scales.x(d.data.year);
+          return scales.x(d.data.time);
         })
         .y0(function(d) {
           return scales.y(d[0]);
@@ -43,7 +48,9 @@ export default {
 path {
   transition: d 200ms ease;
 }
-path:hover {
-  stroke: black;
+
+.active {
+  stroke:#222;
+  stroke-width: 2px;
 }
 </style>

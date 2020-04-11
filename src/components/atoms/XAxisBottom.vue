@@ -1,9 +1,9 @@
 <template>
   <g ref="axis">
-    <line :x1="layout.margin.left" :y1="height" :x2="width" :y2="height"></line>
+    <line :x1="layout.margin.left" :y1="height" :x2="width" :y2="height"/>
     <g v-for="(tick) in ticks" :key="tick" :transform="`translate(${scale.x(tick)}, 0)`">
-      <line :y1="height" :y2="height+10" stroke="black"></line>
-      <text :style="`transform:translateY(${height+30}px)`">{{tick}}</text>
+      <line :y1="height" :y2="height+10" stroke="black"/>
+      <text :style="`transform:translateY(${height+30}px)`">{{ tick }}</text>
     </g>
   </g>
 </template>
