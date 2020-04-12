@@ -1,5 +1,5 @@
 <template>
-  <div class="vue-stream-graph">
+  <div class="stream-graph">
     <stream-graph-clickable
             :layout="layout"
             :origData="origData"
@@ -128,7 +128,7 @@ export default {
   opacity: 0;
 }
 
-.vue-stream-graph {
+.stream-graph {
   display: flex;
   flex-direction: row;
   align-self: center;

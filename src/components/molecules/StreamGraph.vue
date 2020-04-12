@@ -1,11 +1,11 @@
 <template>
-  <div class="vue-stream-graph">
+  <div class="stream-graph">
     <svg
       :width="layout.width"
       :height="layout.height"
       style="background: #f2f2f7;"
       @mousemove="mouseMoved"
-      @mouseleave="$emit('mouseLeft')"
+      @mouseleave="$emit('mouseleft')"
     >
       <transition-group tag="g" name="fade">
         <path-area
@@ -20,7 +20,7 @@
         />
       </transition-group>
       <x-selector v-if="hasSelector" :data="selectorData" />
-      <axes-left-bottom :scale="{x:scaleX, y:scaleY}" :layout="layout" />
+      <axes-left-bottom v-if="hasAxes" :scale="{x:scaleX, y:scaleY}" :layout="layout" />
     </svg>
   </div>
 </template>
@@ -47,12 +47,13 @@ export default {
       type: Array,
       default: () => undefined
     },
-    stackOffset: {
-      default: d3StackOffsetSilhouette
-    },
     layout: {
       type: Object,
       default: () => {}
+    },
+    stackOffset: {
+      type: Function,
+      default: d3StackOffsetSilhouette
     },
     hasSelector: {
       type: Boolean,
@@ -61,6 +62,10 @@ export default {
     isClickable: {
       type: Boolean,
       default: false,
+    },
+    hasAxes: {
+      type: Boolean,
+      default: true,
     }
   },
   data: function() {
@@ -196,7 +201,7 @@ export default {
         this.$emit('clicked', key);
       }
     }
-  }
+  },
 };
 </script>
 
@@ -210,17 +215,10 @@ export default {
   opacity: 0;
 }
 
-.vue-stream-graph {
+.stream-graph {
   display: flex;
   flex-direction: row;
   align-self: center;
   justify-content: center;
-}
-
-.selectedContainer {
-  display: flex;
-  flex-direction: column;
-  width: 10vw;
-  transition: all 1000ms;
 }
 </style>

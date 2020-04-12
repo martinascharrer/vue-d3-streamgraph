@@ -56,7 +56,7 @@ export default {
         layout: {
           width: 300,
           height: 200,
-          margin: {top: 100, bottom: 100, left: 30, right: 20}
+          margin: { top: 100, bottom: 100, left: 30, right: 20 }
         },
       },
     };

@@ -1,5 +1,5 @@
 <template>
-  <div class="vue-stream-graph">
+  <div class="stream-graph">
     <info-box
       v-if="infobox.isVisible"
       :x="infobox.x"
@@ -12,7 +12,7 @@
       :layout="layout"
       :origData="origData"
       :stackOffset="stackOffset"
-      hasSelector="true"
+      :hasSelector="true"
       @mousemoved="updateInfoBox"
       @mouseleft="DeactivateInfobox"
     />
@@ -117,7 +117,7 @@ export default {
   opacity: 0;
 }
 
-.vue-stream-graph {
+.stream-graph {
   display: flex;
   flex-direction: row;
   align-self: center;
