@@ -1,5 +1,5 @@
 <template>
-  <div class="stream-graph">
+  <div class="stream-graph-infobox">
     <stream-graph-clickable
             :layout="layout"
             :origData="origData"
@@ -9,12 +9,13 @@
     />
     <div
       v-if="selected.isVisible"
-      :style="{border: `3px solid ${selected.color}`}"
+      :style="`border: 3px solid ${selected.color}`"
       class="selectedContainer"
     >
-      <h3>{{selected.name}}</h3>
-      <p>highest: {{selected.allTimeHigh}}</p>
-      <p>lowest: {{selected.allTimeLow}}</p>
+      <h2>{{selected.name}}</h2>
+      <p><em>highest:</em> {{selected.allTimeHigh}}</p>
+      <p><em>lowest:</em> {{selected.allTimeLow}}</p>
+      <p><em>average:</em> {{selected.average}}</p>
     </div>
     <p v-else class="selectedContainer">
       <em>Select one of the areas for more information.</em>
@@ -96,11 +97,17 @@ export default {
   methods: {
     activateSelected(key) {
       let selectedData = this.getDataByKey(key);
+      let sum = 0;
+      for (let i = 0; i < selectedData.length; i++){
+        sum += +selectedData[i];
+      }
+      console.log(sum);
       this.selected = {
         isVisible: true,
         name: key,
         allTimeHigh: Math.floor(Math.max(...selectedData) * 100) / 100,
         allTimeLow: Math.floor(Math.min(...selectedData) * 100) / 100,
+        average: Math.round(sum / selectedData.length),
         color: this.color(key),
       };
     },
@@ -119,26 +126,24 @@ export default {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.7s;
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.stream-graph {
+.stream-graph-infobox {
   display: flex;
   flex-direction: row;
-  align-self: center;
   justify-content: center;
 }
 
 .selectedContainer {
   display: flex;
   flex-direction: column;
-  width: 10vw;
-  transition: all 1000ms;
+  justify-content: center;
+  width: 15vw;
+  height: auto;
+  transition: border 1000ms;
+  margin-left: 1em;
+}
+
+em {
+  font-weight: bold;
+  font-style: normal;
 }
 </style>

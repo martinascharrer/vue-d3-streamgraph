@@ -1,5 +1,5 @@
 <template>
-  <div class="stream-graph">
+  <div class="stream-graph-search-field">
     <StreamGraph
             class="stream-graph-bar-chart__item"
             :layout="layout"
@@ -7,7 +7,7 @@
             :stack-offset="stackOffset"
     />
     <div class="infobox">
-      <h3><input type="number" v-model="searchedYear" @change="searchData"/></h3>
+      <input type="number" v-model="searchedYear" @change="searchData"/>
       <p>{{ infobox.text }}</p>
       <ul v-if="infobox.entries != null" class="list">
         <li v-for="entry in infobox.entries" :key="entry.label">
@@ -123,16 +123,20 @@ export default {
 </script>
 
 <style scoped>
+  .stream-graph-search-field {
+    display: flex;
+    justify-content: center;
+  }
+
   .infobox {
     width: 15vw;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-left: 2em;
     background: white;
+    border: 2px solid #e2e2e7;
     padding: 1em;
-    -webkit-box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
-    -moz-box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
-    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
   }
 
   .list {
