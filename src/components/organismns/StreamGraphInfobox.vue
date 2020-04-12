@@ -4,6 +4,7 @@
             :layout="layout"
             :origData="origData"
             :stackOffset="stackOffset"
+            is-clickable="true"
             @clicked="activateSelected"
     />
     <div
@@ -30,7 +31,7 @@ import {
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
-import StreamGraphClickable from "../molecules/StreamGraphClickable";
+import StreamGraph from "../molecules/StreamGraph";
 
 export default {
   name: "StreamGraphInfobox",
@@ -70,7 +71,7 @@ export default {
     };
   },
   components: {
-    StreamGraphClickable
+    StreamGraphClickable: StreamGraph
   },
   computed: {
     keys() {

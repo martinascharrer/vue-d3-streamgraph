@@ -1,10 +1,11 @@
 <template>
   <div class="stream-graph-bar-chart">
-    <StreamGraphSelector
+    <StreamGraph
             class="stream-graph-bar-chart__item"
             :layout="layout"
             :orig-data="origData"
             :stack-offset="stackOffset"
+            :hasSelector="true"
             @mousemoved="updateBarChartData"
     />
     <bar-chart
@@ -29,7 +30,7 @@ import {
 } from "d3-scale";
 
 import BarChart from "../atoms/BarChart";
-import StreamGraphSelector from "../molecules/StreamGraphSelector";
+import StreamGraph from "../molecules/StreamGraph";
 
 export default {
   name: "StreamGraphBarChart",
@@ -62,7 +63,7 @@ export default {
   },
   components: {
     BarChart,
-    StreamGraphSelector,
+    StreamGraph,
   },
   computed: {
     keys() {

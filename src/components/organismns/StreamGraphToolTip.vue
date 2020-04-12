@@ -8,12 +8,13 @@
       :text="infobox.text"
       :entries="infobox.entries"
     />
-    <stream-graph-selector
-            :layout="layout"
-            :origData="origData"
-            :stackOffset="stackOffset"
-            @mousemoved="updateInfoBox"
-            @mouseleft="DeactivateInfobox"
+    <stream-graph
+      :layout="layout"
+      :origData="origData"
+      :stackOffset="stackOffset"
+      hasSelector="true"
+      @mousemoved="updateInfoBox"
+      @mouseleft="DeactivateInfobox"
     />
   </div>
 </template>
@@ -24,8 +25,9 @@ import {
   interpolateViridis as d3InterpolateViridis
 } from "d3";
 import { scaleOrdinal as d3ScaleOrdinal } from "d3-scale";
+
 import InfoBox from "../atoms/ToolTip.vue";
-import StreamGraphSelector from "../molecules/StreamGraphSelector";
+import StreamGraph from "../molecules/StreamGraph";
 
 
 export default {
@@ -57,7 +59,7 @@ export default {
   },
   components: {
     InfoBox,
-    StreamGraphSelector,
+    StreamGraph,
   },
   computed: {
     keys() {
@@ -101,25 +103,6 @@ export default {
         isVisible: true,
       }
     },
-    updateSelector(closestPoint) {
-      this.selectorData = [
-        { x: closestPoint.x, y: this.layout.margin.top },
-        {
-          x: closestPoint.x,
-          y: this.layout.height - this.layout.margin.bottom
-        }
-      ];
-    },
-    getClosestPoint(x) {
-      let value = this.xValues
-        .map(data => ({
-          x: this.scaleX(data),
-          diff: Math.abs(this.scaleX(data) - x),
-          time: data
-        }))
-        .reduce((memo, val) => (memo.diff < val.diff ? memo : val));
-      return value;
-    }
   }
 };
 </script>

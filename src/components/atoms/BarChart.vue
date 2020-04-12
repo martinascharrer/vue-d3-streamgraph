@@ -2,7 +2,10 @@
     <div>
     <h3 v-if="title">{{ title }}</h3>
         <div class="bar-chart" :style="`height: ${graphHeight}px; width: ${graphWidth}px`">
-            <span v-for="i in nrOfAxis" :key="i" class="bar-chart__axis" :style="`transform: translateX(${i*xMaxSeparate}px)`"></span>
+            <div v-for="i in nrOfAxis" :key="i" :style="`transform: translateX(${i*xMaxSeparate}px)`">
+                <span class="bar-chart__axis"></span>
+                <p class="bar-chart__axisLabel">{{ i * xMaxSeparate }}</p>
+            </div>
             <div v-for="(d, i) in data" :key="d.label+i" class="bar-chart__line">
                 <span
                         class="bar-chart__bar"
@@ -98,6 +101,12 @@ export default {
     width:1px;
     height: 200px;
     background: #ccc;
+    z-index: 0;
+}
+
+.bar-chart__axisLabel {
+    position: fixed;
+    color: #ccc;
     z-index: 0;
 }
 

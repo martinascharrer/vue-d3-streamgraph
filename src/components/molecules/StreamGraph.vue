@@ -1,8 +1,11 @@
 <template>
-  <div class="stream-graph">
+  <div class="vue-stream-graph">
     <svg
       :width="layout.width"
       :height="layout.height"
+      style="background: #f2f2f7;"
+      @mousemove="mouseMoved"
+      @mouseleave="$emit('mouseLeft')"
     >
       <transition-group tag="g" name="fade">
         <path-area
@@ -12,8 +15,11 @@
           :layout="layout"
           :scales="{x:scaleX, y:scaleY}"
           :color="color(d.key)"
+          :isActive="isClickable && selected === d.key"
+          @clicked="pathAreaClicked(d.key)"
         />
       </transition-group>
+      <x-selector v-if="hasSelector" :data="selectorData" />
       <axes-left-bottom :scale="{x:scaleX, y:scaleY}" :layout="layout" />
     </svg>
   </div>
@@ -30,8 +36,9 @@ import {
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
-import PathArea from "../atoms/PathArea.vue";
 import AxesLeftBottom from "../molecules/AxesLeftBottom.vue";
+import PathArea from "../atoms/PathArea.vue";
+import XSelector from "../atoms/XSelector";
 
 export default {
   name: "StreamGraph",
@@ -46,6 +53,14 @@ export default {
     layout: {
       type: Object,
       default: () => {}
+    },
+    hasSelector: {
+      type: Boolean,
+      default: false,
+    },
+    isClickable: {
+      type: Boolean,
+      default: false,
     }
   },
   data: function() {
@@ -53,16 +68,15 @@ export default {
       stackedData: null,
       selectorData: [
         { x: this.layout.margin.left, y: this.layout.margin.top },
-        {
-          x: this.layout.margin.left,
-          y: this.layout.height - this.layout.margin.bottom
-        }
-      ]
+        { x: this.layout.margin.left, y: this.layout.height - this.layout.margin.bottom },
+      ],
+      selected: "",
     };
   },
   components: {
     PathArea,
     AxesLeftBottom,
+    XSelector
   },
   computed: {
     keys() {
@@ -149,6 +163,39 @@ export default {
 
       return stackedData;
     },
+    mouseMoved(event) {
+      if(this.hasSelector) {
+        let closestPoint = this.getClosestPoint(event.offsetX + 15);
+        let closestPointData;
+        this.origData.forEach(d => {
+          if (d.time == closestPoint.time) closestPointData = d;
+        });
+        this.updateSelector(closestPoint);
+        this.$emit('mousemoved', closestPointData, event);
+      }
+    },
+    updateSelector(closestPoint) {
+      this.selectorData = [
+        { x: closestPoint.x, y: this.layout.margin.top },
+        { x: closestPoint.x, y: this.layout.height - this.layout.margin.bottom },
+      ];
+    },
+    getClosestPoint(x) {
+      let value = this.xValues
+        .map(data => ({
+          x: this.scaleX(data),
+          diff: Math.abs(this.scaleX(data) - x),
+          time: data
+        }))
+        .reduce((memo, val) => (memo.diff < val.diff ? memo : val));
+      return value;
+    },
+    pathAreaClicked(key){
+      if(this.isClickable){
+        this.selected = key;
+        this.$emit('clicked', key);
+      }
+    }
   }
 };
 </script>

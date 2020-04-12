@@ -8,7 +8,7 @@
 
             <label for="selectStackOffset">StackOffset</label>
             <select id="selectStackOffset" v-model="stackOffset">
-                <option v-for="option in options" :value="option.value" :key="option.text">{{ option.text }}</option>
+                <option v-for="option in stackOffsetOptions" :value="option.value" :key="option.text">{{ option.text }}</option>
             </select>
 
             <label for="selectData">Data</label>
@@ -85,12 +85,12 @@ export default {
             layout: {
                 width: 800,
                 height: 400,
-                margin: {top: 50, bottom: 50, left: 50, right: 40}
+                margin: {top: 50, bottom: 50, left: 70, right: 20}
             },
             stackOffset: stackOffsetNone,
             interactivity: "barchart",
             interactivityOptions: [ "simple", "infobox", "tooltip", "searchfield", "barchart" ],
-            options: [
+            stackOffsetOptions: [
                 {text: "Silhouette", value: stackOffsetSilhouette},
                 {text: "Baseline", value: stackOffsetNone},
                 {text: "Expand", value: stackOffsetExpand}
