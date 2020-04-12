@@ -10,11 +10,11 @@
     />
     <bar-chart
             class="stream-graph-bar-chart__item"
-            :data="barChartData.entries"
-            :title="barChartData.title"
-            :layout="barChartData.layout"
+            :data="barChart.entries"
+            :title="barChart.title"
+            :layout="barChart.layout"
             :bar-width="10"
-            :extremes="{ min: 0, max: 50000 }"
+            :max="barChart.max"
             :nr-of-axis="4"
     />
   </div>
@@ -50,14 +50,15 @@ export default {
   data: function() {
     return {
       searchedYear: 0,
-      barChartData: {
+      barChart: {
         title: "",
         entries: [],
         layout: {
           width: 300,
           height: 200,
-          margin: { top: 100, bottom: 100, left: 30, right: 20 }
+          margin: { top: 20, bottom: 20, left: 40, right: 20 }
         },
+        max: 100,
       },
     };
   },
@@ -78,25 +79,36 @@ export default {
       return d3ScaleOrdinal()
         .domain(this.keys)
         .range(colors);
+    },
+    origDataValues() {
+      let values = [];
+      for (let i = 0; i < this.origData.length; i++) {
+        for (let j = 0; j < this.keys.length; j++) {
+          let key = this.keys[j];
+          values.push(this.origData[i][key]);
+        }
+      }
+      return values;
     }
   },
   methods: {
     updateBarChartData(data) {
-      this.barChartData.entries = [];
+      this.barChart.entries = [];
       let columns = this.origData.columns;
       for (let i = 1; i < columns.length; i++) {
-        this.barChartData.entries.push({
+        this.barChart.entries.push({
           label: columns[i],
           value: data[columns[i]],
           color: this.color(columns[i])
         });
       }
-      this.barChartData.title = "Year: " + data.time;
+      this.barChart.title = "Year: " + data.time;
+      this.barChart.max = Math.max(...this.origDataValues);
     },
     searchData() {
       let data = this.getDataByYear(this.searchedYear);
       this.updateBarChartData(data);
-      // update/grey selector?
+      // TODO: update selector
     },
     getDataByYear(year) {
       let data = [];
@@ -105,7 +117,7 @@ export default {
       });
       return data;
     },
-  }
+  },
 };
 </script>
 

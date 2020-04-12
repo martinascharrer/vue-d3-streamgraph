@@ -1,12 +1,22 @@
 <template>
-    <div>
-    <h3 v-if="title">{{ title }}</h3>
-        <div class="bar-chart" :style="`height: ${graphHeight}px; width: ${graphWidth}px`">
-            <div v-for="i in nrOfAxis" :key="i" :style="`transform: translateX(${i*xMaxSeparate}px)`">
-                <span class="bar-chart__axis"></span>
-                <p class="bar-chart__axisLabel">{{ i * xMaxSeparate }}</p>
+    <div class="bar-chart">
+        <h2 v-if="title">{{ title }}</h2>
+        <div class="bar-chart__chart"
+             :style="`height: ${ graphHeight }px; width: ${ graphWidth }px;
+             padding-left:${ layout.margin.left }px; padding-top:${ layout.margin.top }px;
+             padding-right:${ layout.margin.right }px; padding-bottom:${ layout.margin.bottom }px;`"
+        >
+            <div class="bar-chart__axisContainer">
+                <div v-for="tick in ticks" :key="tick" :style="`transform: translateX(${ scaleX(tick) }px)`">
+                    <span class="bar-chart__axis" :style="`height: ${layout.height - 20}px`"></span>
+                    <p class="bar-chart__axisLabel" :style="`margin-top: ${layout.height - 15}px`">{{ tick }}</p>
+                </div>
             </div>
-            <div v-for="(d, i) in data" :key="d.label+i" class="bar-chart__line">
+
+            <div
+                    v-for="(d, i) in data"
+                    :key="d.label+i" class="bar-chart__line"
+            >
                 <span
                         class="bar-chart__bar"
                      :style="`width: ${scaleX(d.value)}px; height: ${barWidth}px; background: ${d.color}`"
@@ -42,8 +52,13 @@ export default {
             type: Number,
             required: true,
         },
-        extremes: {
-          required: true,
+        min: {
+            type: Number,
+            default: 0,
+        },
+        max: {
+            type: Number,
+            default: 100,
         },
         nrOfAxis: {
             required: true,
@@ -63,28 +78,13 @@ export default {
                 this.layout.width
             );
         },
-        xMin() {
-            return Math.min(...this.values);
-        },
-        xMax() {
-            return Math.max(...this.values);
-        },
-        xMaxSeparate() {
-            return this.scaleX(50000) / this.nrOfAxis;
-        },
-        values() {
-            let values = [];
-            for(let i=0; i < this.data.length; i++){
-                values.push(this.data[i].value);
-            }
-            return values;
+        ticks() {
+            return this.scaleX.ticks(this.nrOfAxis);
         },
         scaleX() {
             return d3ScaleLinear()
-                .domain([0, 50000])
-                .range([
-                    0, this.layout.width - this.layout.margin.right
-                ]);
+                .domain([ this.min, this.max ])
+                .range([ 0, this.layout.width - this.layout.margin.right ]);
         },
     }
 }
@@ -92,15 +92,32 @@ export default {
 
 <style scoped>
 .bar-chart {
+    border: 2px solid #e2e2e7;
+    height: 400px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+}
+
+.bar-chart__chart {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+
+.bar-chart__axisContainer {
+    position: fixed;
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .bar-chart__axis {
     position: fixed;
     width:1px;
     height: 200px;
-    background: #ccc;
+    background: #e2e2e7;
     z-index: 0;
 }
 
@@ -119,6 +136,7 @@ export default {
 }
 
 .bar-chart__label {
+    z-index: 1;
     margin-left: 0.5em;
 }
 
