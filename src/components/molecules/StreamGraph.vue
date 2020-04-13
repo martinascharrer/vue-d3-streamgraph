@@ -1,29 +1,28 @@
 <template>
-  <div class="stream-graph">
     <svg
+      class="stream-graph"
       :width="layout.width"
       :height="layout.height"
-      style="background: #fff; border: 2px solid #f2f2fe;"
       @mousemove="mouseMoved"
       @mouseleave="$emit('mouseleft')"
     >
       <x-axis
-              v-if="hasXAxis"
-              :scale="{ x:scaleX, y:scaleY }"
-              :layout="layout"
-              :tick-width="tickWidth"
-              :nrOfTicks="nrOfXTicks"
-              :vertical="xAxisLong"
-              :has-lines="xAxisHasLines"
-              :has-end-line="xAxisHasEndLine"
+        v-if="hasXAxis"
+        :scale="{ x:scaleX, y:scaleY }"
+        :layout="layout"
+        :tick-width="tickWidth"
+        :nrOfTicks="nrOfXTicks"
+        :vertical="xAxisLong"
+        :has-lines="xAxisHasLines"
+        :has-end-line="xAxisHasEndLine"
       />
       <y-axis
-              v-if="hasYAxis"
-              :scale="{ x:scaleX, y:scaleY }"
-              :layout="layout"
-              :tick-width="tickWidth"
-              :nrOfTicks="nrOfYTicks"
-              :horizontal="yAxisLong"
+        v-if="hasYAxis"
+        :scale="{ x:scaleX, y:scaleY }"
+        :layout="layout"
+        :tick-width="tickWidth"
+        :nrOfTicks="nrOfYTicks"
+        :horizontal="yAxisLong"
       />
       <transition-group tag="g" name="fade">
         <path-area
@@ -31,12 +30,21 @@
           :key="d.key"
           :data="d"
           :layout="layout"
-          :scales="{x:scaleX, y:scaleY}"
+          :scales="{ x:scaleX, y:scaleY }"
           :color="color(d.key)"
-          :isActive="isClickable && selected === d.key"
-          @clicked="pathAreaClicked(d.key)"
+          @clicked="pathAreaClicked(d.key, d)"
         />
       </transition-group>
+      <transition name="fade">
+        <path-area
+          v-if="isClickable && selected.isVisible"
+          :data="selected.data"
+          :layout="layout"
+          :scales="{ x:scaleX, y:scaleY }"
+          :is-active="true"
+          :color="color(selected.key)"
+        />
+      </transition>
       <x-selector
         v-if="hasSelector"
         :data="selectorData.data"
@@ -44,7 +52,6 @@
         :dotData="selectorData.dotData"
       />
     </svg>
-  </div>
 </template>
 
 <script>
@@ -136,7 +143,9 @@ export default {
         ],
         dotData: [],
       },
-      selected: "",
+      selected: {
+        isVisible: false,
+      },
     };
   },
   components: {
@@ -205,20 +214,23 @@ export default {
   },
   watch: {
     origData() {
-      this.stackedData = this.getStackedData();
+      this.init();
     },
     stackOffset() {
-      this.stackedData = this.getStackedData();
+      this.init();
     }
   },
   methods: {
     getStackedData() {
-      //stack the data
       let stackedData = d3Stack()
         .offset(this.stackOffset)
         .keys(this.keys)(this.origData);
-
       return stackedData;
+    },
+    init() {
+      this.selected.isVisible = false;
+      this.stackedData = this.getStackedData();
+      this.$emit('initialized');
     },
     mouseMoved(event) {
       if(this.hasSelector) {
@@ -264,9 +276,13 @@ export default {
       }
       return values;
     },
-    pathAreaClicked(key){
-      if(this.isClickable){
-        this.selected = key;
+    pathAreaClicked(key, data) {
+      if(this.isClickable) {
+        this.selected = {
+          isVisible: true,
+          key: key,
+          data: data,
+        };
         this.$emit('clicked', key);
       }
     }
@@ -277,14 +293,16 @@ export default {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.7s;
+  transition: opacity 500ms;
 }
+
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
 }
 
 .stream-graph {
+  border: 2px solid #e2e2e7;
   display: flex;
   flex-direction: row;
   align-self: center;

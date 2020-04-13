@@ -6,6 +6,7 @@
             :stackOffset="stackOffset"
             :is-clickable="true"
             @clicked="activateSelected"
+            @initialized="resetInfobox"
     />
     <div
       v-if="selected.isVisible"
@@ -101,7 +102,6 @@ export default {
       for (let i = 0; i < selectedData.length; i++){
         sum += +selectedData[i];
       }
-      console.log(sum);
       this.selected = {
         isVisible: true,
         name: key,
@@ -110,6 +110,11 @@ export default {
         average: Math.round(sum / selectedData.length),
         color: this.color(key),
       };
+    },
+    resetInfobox() {
+      this.selected = {
+        isVisible: false,
+      }
     },
     getDataByKey(key) {
       let data = [];
@@ -134,6 +139,7 @@ export default {
 
 .stream-graph-infobox .path-area:hover {
   opacity: 0.9;
+  transition: opacity 200ms;
 }
 
 .selectedContainer {
