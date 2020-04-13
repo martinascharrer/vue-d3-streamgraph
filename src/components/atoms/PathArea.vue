@@ -56,7 +56,7 @@ export default {
 
 <style scoped>
 .path-area {
-  transition: d 200ms ease;
+  transition: all 200ms ease;
 }
 
 .active {

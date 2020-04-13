@@ -57,18 +57,18 @@
 <script>
 import {
   stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis,
   stack as d3Stack
 } from "d3";
 import {
   scaleLinear as d3ScaleLinear,
-  scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
 import PathArea from "../atoms/PathArea.vue";
 import XAxis from "../atoms/XAxis";
 import XSelector from "../atoms/XSelector";
 import YAxis from "../atoms/YAxis";
+
+import {color} from "../../utils/colors";
 
 export default {
   name: "StreamGraph",
@@ -80,6 +80,13 @@ export default {
     layout: {
       type: Object,
       default: () => {}
+    },
+    colorArray: {
+      type: Array,
+    },
+    colorInterpolation: {
+      type: Function,
+      required: true,
     },
     stackOffset: {
       type: Function,
@@ -202,14 +209,7 @@ export default {
         ]);
     },
     color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-        .domain(this.keys)
-        .range(colors);
+      return color(this.colorArray, this.colorInterpolation, this.keys);
     }
   },
   watch: {
@@ -306,6 +306,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-self: center;
+  align-items: center;
   justify-content: center;
 }
 </style>

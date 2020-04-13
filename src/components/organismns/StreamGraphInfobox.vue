@@ -5,6 +5,8 @@
             :origData="origData"
             :stackOffset="stackOffset"
             :is-clickable="true"
+            :color-interpolation="colorInterpolation"
+            :color-array="colorArray"
             @clicked="activateSelected"
             @initialized="resetInfobox"
     />
@@ -27,13 +29,13 @@
 <script>
 import {
   stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis,
 } from "d3";
 import {
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
 import StreamGraph from "../molecules/StreamGraph";
+import {getColorArrayByInterpolation} from "../../utils/colors";
 
 export default {
   name: "StreamGraphInfobox",
@@ -49,9 +51,12 @@ export default {
       type: Object,
       default: () => {},
     },
-    colorScheme: {
-      default: d3InterpolateViridis,
-    }
+    colorArray: {
+      type: Array,
+    },
+    colorInterpolation: {
+      type: Function,
+    },
   },
   data: function() {
     return {
@@ -80,14 +85,8 @@ export default {
       return this.origData.columns.slice(1);
     },
     color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-        .domain(this.keys)
-        .range(colors);
+      let colors = this.colorArray ? this.colorArray : getColorArrayByInterpolation(this.keys, this.colorInterpolation);
+      return d3ScaleOrdinal().domain(this.keys).range(colors);
     }
   },
   watch: {

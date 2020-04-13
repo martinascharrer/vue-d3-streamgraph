@@ -10,7 +10,10 @@
             :y-axis-long="true"
             :x-axis-long="true"
             :x-axis-has-end-line="true"
+            :color-interpolation="colorInterpolation"
+            :color-array="colorArray"
             @mousemoved="updateBarChartData"
+            @initialized="resetBarChart"
     />
     <bar-chart
             class="stream-graph-bar-chart__item"
@@ -26,15 +29,12 @@
 
 <script>
 import {
-  stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis,
-} from "d3";
-import {
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
 import BarChart from "../atoms/BarChart";
 import StreamGraph from "../molecules/StreamGraph";
+import {getColorArrayByInterpolation} from "../../utils/colors";
 
 export default {
   name: "StreamGraphBarChart",
@@ -44,12 +44,18 @@ export default {
       default: () => undefined
     },
     stackOffset: {
-      default: d3StackOffsetSilhouette
+      type: Function,
     },
     layout: {
       type: Object,
       default: () => {}
-    }
+    },
+    colorArray: {
+      type: Array,
+    },
+    colorInterpolation: {
+      type: Function,
+    },
   },
   data: function() {
     return {
@@ -74,14 +80,8 @@ export default {
       return this.origData.columns.slice(1);
     },
     color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-        .domain(this.keys)
-        .range(colors);
+      let colors = this.colorArray ? this.colorArray : getColorArrayByInterpolation(this.keys, this.colorInterpolation);
+      return d3ScaleOrdinal().domain(this.keys).range(colors);
     },
     origDataValues() {
       let values = [];
@@ -107,6 +107,17 @@ export default {
       }
       this.barChart.title = "Year: " + data.time;
       this.barChart.max = Math.max(...this.origDataValues);
+    },
+    resetBarChart() {
+      this.barChart = {
+        title: "",
+                entries: [],
+                layout: {
+          width: 400,
+                  height: 250,
+                  margin: { top: 20, bottom: 40, left: 40, right: 40 }
+        },
+      };
     },
     searchData() {
       let data = this.getDataByYear(this.searchedYear);
