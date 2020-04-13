@@ -4,7 +4,7 @@
             :layout="layout"
             :origData="origData"
             :stackOffset="stackOffset"
-            is-clickable="true"
+            :is-clickable="true"
             @clicked="activateSelected"
     />
     <div
@@ -125,11 +125,15 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .stream-graph-infobox {
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+
+.stream-graph-infobox .path-area:hover {
+  opacity: 0.9;
 }
 
 .selectedContainer {
