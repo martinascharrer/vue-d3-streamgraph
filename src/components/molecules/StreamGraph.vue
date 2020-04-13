@@ -19,8 +19,17 @@
           @clicked="pathAreaClicked(d.key)"
         />
       </transition-group>
-      <x-selector v-if="hasSelector" :data="selectorData" />
-      <axes-left-bottom v-if="hasAxes" :scale="{x:scaleX, y:scaleY}" :layout="layout" />
+      <x-selector
+        v-if="hasSelector"
+        :data="selectorData.data"
+        :hasDots="hasSelectorDots"
+        :dotData="selectorData.dotData"
+      />
+      <axes-left-bottom
+        v-if="hasAxes"
+        :scale="{x:scaleX, y:scaleY}"
+        :layout="layout"
+      />
     </svg>
   </div>
 </template>
@@ -59,6 +68,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    hasSelectorDots: {
+      type: Boolean,
+      default: false,
+    },
     isClickable: {
       type: Boolean,
       default: false,
@@ -71,10 +84,13 @@ export default {
   data: function() {
     return {
       stackedData: null,
-      selectorData: [
-        { x: this.layout.margin.left, y: this.layout.margin.top },
-        { x: this.layout.margin.left, y: this.layout.height - this.layout.margin.bottom },
-      ],
+      selectorData: {
+        data: [
+                { x: this.layout.margin.left, y: this.layout.margin.top },
+                { x: this.layout.margin.left, y: this.layout.height - this.layout.margin.bottom },
+        ],
+        dotData: [],
+      },
       selected: "",
     };
   },
@@ -175,12 +191,16 @@ export default {
         this.origData.forEach(d => {
           if (d.time == closestPoint.time) closestPointData = d;
         });
+        this.selectorData.dotData = [];
+        if(this.hasSelectorDots) {
+          this.selectorData.dotData = this.getStackedDataByYear(closestPointData.time);
+        }
         this.updateSelector(closestPoint);
         this.$emit('mousemoved', closestPointData, event);
       }
     },
     updateSelector(closestPoint) {
-      this.selectorData = [
+      this.selectorData.data = [
         { x: closestPoint.x, y: this.layout.margin.top },
         { x: closestPoint.x, y: this.layout.height - this.layout.margin.bottom },
       ];
@@ -194,6 +214,19 @@ export default {
         }))
         .reduce((memo, val) => (memo.diff < val.diff ? memo : val));
       return value;
+    },
+    getStackedDataByYear(year) {
+      year = year - this.stackedData[0][0].data.time;
+      let values = [];
+      for(let i = 0; i < this.stackedData.length; i++) {
+        let key = this.stackedData[i].key;
+        values.push({
+          name: key,
+          value: this.scaleY(this.stackedData[i][year][1]),
+          color: this.color(key),
+        });
+      }
+      return values;
     },
     pathAreaClicked(key){
       if(this.isClickable){

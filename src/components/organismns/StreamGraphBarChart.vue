@@ -6,6 +6,7 @@
             :orig-data="origData"
             :stack-offset="stackOffset"
             :hasSelector="true"
+            :has-selector-dots="true"
             @mousemoved="updateBarChartData"
     />
     <bar-chart

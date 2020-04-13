@@ -13,6 +13,7 @@
       :origData="origData"
       :stackOffset="stackOffset"
       :hasSelector="true"
+      :has-selector-dots="true"
       @mousemoved="updateInfoBox"
       @mouseleft="DeactivateInfobox"
     />
