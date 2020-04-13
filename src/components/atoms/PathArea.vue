@@ -1,5 +1,5 @@
 <template>
-  <path :d="d" :fill="color" @click="$emit('clicked')" :class="{active : isActive}"></path>
+  <path :d="d" :fill="color" @click="$emit('clicked')" :class="{active : isActive, 'path-area' : true}"></path>
 </template>
 
 <script>
@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style scoped>
-path {
+.path-area {
   transition: d 200ms ease;
 }
 

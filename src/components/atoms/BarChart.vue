@@ -1,38 +1,48 @@
 <template>
     <div class="bar-chart">
         <h2 v-if="title">{{ title }}</h2>
-        <div class="bar-chart__chart"
-             :style="`height: ${ graphHeight }px; width: ${ graphWidth }px;
-             padding-left:${ layout.margin.left }px; padding-top:${ layout.margin.top }px;
-             padding-right:${ layout.margin.right }px; padding-bottom:${ layout.margin.bottom }px;`"
+        <svg
+            :width="layout.width"
+            :height="layout.height"
         >
-            <div class="bar-chart__axisContainer">
-                <div v-for="tick in ticks" :key="tick" :style="`transform: translateX(${ scaleX(tick) }px)`">
-                    <span class="bar-chart__axis" :style="`height: ${layout.height - 20}px`"></span>
-                    <p class="bar-chart__axisLabel" :style="`margin-top: ${layout.height - 15}px`">{{ tick }}</p>
-                </div>
-            </div>
-
-            <div
-                    v-for="(d, i) in data"
-                    :key="d.label+i" class="bar-chart__line"
+            <x-axis
+                :scale="{ x: scaleX }"
+                :layout="layout"
+                :tick-width="10"
+                :nr-of-ticks="nrOfTicks"
+                :vertical="true"
+            />
+            <g
+                v-for="(d, i) in data"
+               :key="d.label"
+               class="bar-chart__line"
+                :transform="`translate(${layout.margin.left}, ${layout.margin.top})`"
             >
-                <span
-                        class="bar-chart__bar"
-                     :style="`width: ${scaleX(d.value)}px; height: ${barWidth}px; background: ${d.color}`"
+                <rect
+                    class="bar-chart__bar"
+                    :width="getBarWidth(d.value)"
+                    :height="barWidth"
+                    :y="i * barOffset"
+                    :fill="d.color"
                 >
-                </span>
-                <span class="bar-chart__label">{{ d.label }}</span>
-            </div>
-            <XAxisBottom :layout="layout" :scale="{ x: scaleX }"/>
-        </div>
+                </rect>
+                <text
+                    class="bar-chart__label"
+                    :transform="`translate(${getBarWidth(d.value) + 5}, ${i * barOffset + ( barWidth / 2 )})`"
+                    :x="0"
+                    :y="0"
+                >
+                    {{ d.label }}
+                </text>
+            </g>
+        </svg>
     </div>
 </template>
 
 <script>
 import { scaleLinear as d3ScaleLinear } from 'd3-scale';
 
-import XAxisBottom from "./XAxisBottom";
+import XAxis from "./XAxis";
 
 export default {
     name: "BarChart",
@@ -46,11 +56,16 @@ export default {
             required: true,
         },
         layout: {
+            type: Object,
             required: true,
         },
         barWidth: {
             type: Number,
-            required: true,
+            default: 15,
+        },
+        spaceBetweenBars: {
+            type: Number,
+            default: 10,
         },
         min: {
             type: Number,
@@ -60,32 +75,30 @@ export default {
             type: Number,
             default: 100,
         },
-        nrOfAxis: {
-            required: true,
+        nrOfTicks: {
+            type: Number,
         }
     },
     components: {
-      XAxisBottom,
+      XAxis,
     },
     computed: {
-        graphHeight() {
-            return (
-                this.layout.height
-            );
-        },
-        graphWidth() {
-            return (
-                this.layout.width
-            );
+        barOffset() {
+            return this.barWidth + this.spaceBetweenBars;
         },
         ticks() {
-            return this.scaleX.ticks(this.nrOfAxis);
+            return this.scaleX.ticks(this.nrOfTicks);
         },
         scaleX() {
             return d3ScaleLinear()
                 .domain([ this.min, this.max ])
-                .range([ 0, this.layout.width - this.layout.margin.right ]);
+                .range([ this.layout.margin.left, this.layout.width - this.layout.margin.right ]);
         },
+    },
+    methods: {
+        getBarWidth(value) {
+            return this.scaleX(value) - this.layout.margin.left;
+        }
     }
 }
 </script>
@@ -99,48 +112,12 @@ export default {
     justify-content: center;
 }
 
-.bar-chart__chart {
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
-}
-
-.bar-chart__axisContainer {
-    position: fixed;
-    margin-left: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.bar-chart__axis {
-    position: fixed;
-    width:1px;
-    height: 200px;
-    background: #e2e2e7;
-    z-index: 0;
-}
-
-.bar-chart__axisLabel {
-    position: fixed;
-    color: #ccc;
-    z-index: 0;
-}
-
-.bar-chart__line {
-    z-index: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: left;
-}
-
 .bar-chart__label {
-    z-index: 1;
-    margin-left: 0.5em;
+    transition: transform 1s;
+    alignment-baseline: middle;
 }
 
 .bar-chart__bar {
-    transition: all 1s;
+    transition: width 1s;
 }
 </style>

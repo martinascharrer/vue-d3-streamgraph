@@ -7,6 +7,9 @@
             :stack-offset="stackOffset"
             :hasSelector="true"
             :has-selector-dots="true"
+            :y-axis-long="true"
+            :x-axis-long="true"
+            :x-axis-has-end-line="true"
             @mousemoved="updateBarChartData"
     />
     <bar-chart
@@ -16,7 +19,7 @@
             :layout="barChart.layout"
             :bar-width="10"
             :max="barChart.max"
-            :nr-of-axis="4"
+            :nr-of-ticks="7"
     />
   </div>
 </template>
@@ -55,11 +58,10 @@ export default {
         title: "",
         entries: [],
         layout: {
-          width: 300,
-          height: 200,
-          margin: { top: 20, bottom: 20, left: 40, right: 20 }
+          width: 400,
+          height: 250,
+          margin: { top: 20, bottom: 40, left: 40, right: 40 }
         },
-        max: 100,
       },
     };
   },

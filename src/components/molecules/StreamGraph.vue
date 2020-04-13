@@ -3,10 +3,28 @@
     <svg
       :width="layout.width"
       :height="layout.height"
-      style="background: #f2f2f7;"
+      style="background: #fff; border: 2px solid #f2f2fe;"
       @mousemove="mouseMoved"
       @mouseleave="$emit('mouseleft')"
     >
+      <x-axis
+              v-if="hasXAxis"
+              :scale="{ x:scaleX, y:scaleY }"
+              :layout="layout"
+              :tick-width="tickWidth"
+              :nrOfTicks="nrOfXTicks"
+              :vertical="xAxisLong"
+              :has-lines="xAxisHasLines"
+              :has-end-line="xAxisHasEndLine"
+      />
+      <y-axis
+              v-if="hasYAxis"
+              :scale="{ x:scaleX, y:scaleY }"
+              :layout="layout"
+              :tick-width="tickWidth"
+              :nrOfTicks="nrOfYTicks"
+              :horizontal="yAxisLong"
+      />
       <transition-group tag="g" name="fade">
         <path-area
           v-for="d in stackedData"
@@ -25,11 +43,6 @@
         :hasDots="hasSelectorDots"
         :dotData="selectorData.dotData"
       />
-      <axes-left-bottom
-        v-if="hasAxes"
-        :scale="{x:scaleX, y:scaleY}"
-        :layout="layout"
-      />
     </svg>
   </div>
 </template>
@@ -45,9 +58,10 @@ import {
   scaleOrdinal as d3ScaleOrdinal
 } from "d3-scale";
 
-import AxesLeftBottom from "../molecules/AxesLeftBottom.vue";
 import PathArea from "../atoms/PathArea.vue";
+import XAxis from "../atoms/XAxis";
 import XSelector from "../atoms/XSelector";
+import YAxis from "../atoms/YAxis";
 
 export default {
   name: "StreamGraph",
@@ -76,10 +90,41 @@ export default {
       type: Boolean,
       default: false,
     },
-    hasAxes: {
+    hasXAxis: {
       type: Boolean,
       default: true,
-    }
+    },
+    hasYAxis: {
+      type: Boolean,
+      default: true,
+    },
+    tickWidth: {
+      type: Number,
+    },
+    nrOfXTicks: {
+      type: Number,
+      default: 10,
+    },
+    nrOfYTicks: {
+      type: Number,
+      default: 10,
+    },
+    xAxisLong: {
+      type: Boolean,
+      default: false,
+    },
+    yAxisLong: {
+      type: Boolean,
+      default: false,
+    },
+    xAxisHasLines: {
+      type: Boolean,
+      default: true,
+    },
+    xAxisHasEndLine: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function() {
     return {
@@ -96,22 +141,13 @@ export default {
   },
   components: {
     PathArea,
-    AxesLeftBottom,
-    XSelector
+    XAxis,
+    XSelector,
+    YAxis,
   },
   computed: {
     keys() {
       return this.origData.columns.slice(1);
-    },
-    graphHeight() {
-      return (
-        this.layout.height - this.layout.margin.top - this.layout.margin.bottom
-      );
-    },
-    graphWidth() {
-      return (
-        this.layout.width - this.layout.margin.left - this.layout.margin.right
-      );
     },
     xValues() {
       return this.origData.map(d => d.time);

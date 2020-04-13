@@ -25,10 +25,11 @@
         <div v-if="interactivity === 'simple'">
             <h2>Simple streamgraph</h2>
             <stream-graph
-                    :layout="simpleLayout"
+                    :layout="layout"
                     :origData="origData"
                     :stackOffset="stackOffset"
-                    :hasAxes="false"
+                    :x-axis-long="true"
+                    :has-y-axis="false"
             />
         </div>
 
@@ -92,7 +93,7 @@ export default {
             layout: {
                 width: 800,
                 height: 400,
-                margin: {top: 50, bottom: 50, left: 70, right: 20},
+                margin: {top: 40, bottom: 70, left: 70, right: 40},
             },
             interactivity: "barchart",
             interactivityOptions: [ "simple", "infobox", "tooltip", "searchfield", "barchart" ],
