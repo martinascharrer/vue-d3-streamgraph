@@ -46,7 +46,7 @@
         />
       </transition>
       <x-selector
-        v-if="hasSelector"
+        v-if="hasSelector && selectorData.isVisible"
         :data="selectorData.data"
         :hasDots="hasSelectorDots"
         :dotData="selectorData.dotData"
@@ -56,98 +56,35 @@
 
 <script>
 import {
-  stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis,
   stack as d3Stack
 } from "d3";
-import {
-  scaleLinear as d3ScaleLinear,
-  scaleOrdinal as d3ScaleOrdinal
-} from "d3-scale";
 
 import PathArea from "../atoms/PathArea.vue";
 import XAxis from "../atoms/XAxis";
 import XSelector from "../atoms/XSelector";
 import YAxis from "../atoms/YAxis";
 
+import { StreamGraphMixin } from '../mixins/StreamGraphMixin'
+
+import { getLinearScale } from "../../utils/scales";
+
 export default {
   name: "StreamGraph",
-  props: {
-    origData: {
-      type: Array,
-      default: () => undefined
-    },
-    layout: {
-      type: Object,
-      default: () => {}
-    },
-    stackOffset: {
-      type: Function,
-      default: d3StackOffsetSilhouette
-    },
-    hasSelector: {
-      type: Boolean,
-      default: false,
-    },
-    hasSelectorDots: {
-      type: Boolean,
-      default: false,
-    },
-    isClickable: {
-      type: Boolean,
-      default: false,
-    },
-    hasXAxis: {
-      type: Boolean,
-      default: true,
-    },
-    hasYAxis: {
-      type: Boolean,
-      default: true,
-    },
-    tickWidth: {
-      type: Number,
-    },
-    nrOfXTicks: {
-      type: Number,
-      default: 10,
-    },
-    nrOfYTicks: {
-      type: Number,
-      default: 10,
-    },
-    xAxisLong: {
-      type: Boolean,
-      default: false,
-    },
-    yAxisLong: {
-      type: Boolean,
-      default: false,
-    },
-    xAxisHasLines: {
-      type: Boolean,
-      default: true,
-    },
-    xAxisHasEndLine: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data: function() {
     return {
       stackedData: null,
       selectorData: {
-        data: [
-                { x: this.layout.margin.left, y: this.layout.margin.top },
-                { x: this.layout.margin.left, y: this.layout.height - this.layout.margin.bottom },
-        ],
+        isVisible: false,
+        data: [],
         dotData: [],
       },
+      currentClosestPoint: { x: this.layout.margin.left },
       selected: {
         isVisible: false,
       },
     };
   },
+  mixins: [ StreamGraphMixin ],
   components: {
     PathArea,
     XAxis,
@@ -155,9 +92,6 @@ export default {
     YAxis,
   },
   computed: {
-    keys() {
-      return this.origData.columns.slice(1);
-    },
     xValues() {
       return this.origData.map(d => d.time);
     },
@@ -186,39 +120,32 @@ export default {
       return Math.min(...this.yValues);
     },
     scaleX() {
-      return d3ScaleLinear()
-        .domain([this.xMin, this.xMax])
-        .range([
-          this.layout.margin.left,
-          this.layout.width - this.layout.margin.right
-        ]);
+      return getLinearScale(
+              [ this.xMin, this.xMax ],
+              [ this.layout.margin.left, this.layout.width - this.layout.margin.right]
+      );
     },
     scaleY() {
-      return d3ScaleLinear()
-        .domain([this.yMin, this.yMax])
-        .range([
-          this.layout.height - this.layout.margin.bottom,
-          this.layout.margin.top
-        ]);
+      return getLinearScale(
+              [this.yMin, this.yMax],
+              [ this.layout.height - this.layout.margin.bottom, this.layout.margin.top]
+      );
     },
-    color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-        .domain(this.keys)
-        .range(colors);
-    }
   },
   watch: {
     origData() {
-      this.init();
+      this.selected.isVisible = false;
+      this.selectorData.isVisible = false;
+      this.stackedData =  this.getStackedData();
+      this.$emit('initialized');
     },
     stackOffset() {
       this.init();
-    }
+    },
+    colorInterpolation() {
+      this.updateSelector();
+      this.$emit('colorchange', this.currentClosestPoint);
+    },
   },
   methods: {
     getStackedData() {
@@ -229,28 +156,30 @@ export default {
     },
     init() {
       this.selected.isVisible = false;
+      this.selectorData.isVisible = false;
       this.stackedData = this.getStackedData();
       this.$emit('initialized');
     },
     mouseMoved(event) {
       if(this.hasSelector) {
-        let closestPoint = this.getClosestPoint(event.offsetX + 15);
+        this.currentClosestPoint = this.getClosestPoint(event.offsetX + 15);
         let closestPointData;
         this.origData.forEach(d => {
-          if (d.time == closestPoint.time) closestPointData = d;
+          if (d.time == this.currentClosestPoint.time) closestPointData = d;
         });
-        this.selectorData.dotData = [];
-        if(this.hasSelectorDots) {
-          this.selectorData.dotData = this.getStackedDataByYear(closestPointData.time);
-        }
-        this.updateSelector(closestPoint);
+        this.updateSelector();
         this.$emit('mousemoved', closestPointData, event);
       }
     },
-    updateSelector(closestPoint) {
+    updateSelector() {
+      this.selectorData.isVisible = true;
+      this.selectorData.dotData = [];
+      if(this.hasSelectorDots) {
+        this.selectorData.dotData = this.getStackedDataByYear(this.currentClosestPoint.time);
+      }
       this.selectorData.data = [
-        { x: closestPoint.x, y: this.layout.margin.top },
-        { x: closestPoint.x, y: this.layout.height - this.layout.margin.bottom },
+        { x: this.currentClosestPoint.x, y: this.layout.margin.top },
+        { x: this.currentClosestPoint.x, y: this.layout.height - this.layout.margin.bottom },
       ];
     },
     getClosestPoint(x) {
@@ -306,6 +235,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-self: center;
+  align-items: center;
   justify-content: center;
 }
 </style>

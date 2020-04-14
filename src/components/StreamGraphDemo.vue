@@ -20,41 +20,53 @@
                 >{{ option.text }}
                 </option>
             </select>
+
+            <label for="colorInterpolation">color</label>
+            <select id="colorInterpolation" v-model="colorInterpolation">
+                <option
+                        v-for="option in colorInterpolationOptions"
+                        :value="option.value"
+                        :key="option.text"
+                >{{ option.text }}
+                </option>
+            </select>
         </nav>
 
         <div v-if="interactivity === 'simple'">
             <h2>Simple streamgraph</h2>
             <stream-graph
-                    :layout="layout"
-                    :origData="origData"
-                    :stackOffset="stackOffset"
-                    :x-axis-long="true"
-                    :has-y-axis="false"
+                :layout="layout"
+                :origData="origData"
+                :stackOffset="stackOffset"
+                :x-axis-long="true"
+                :has-y-axis="false"
+                :color-interpolation="colorInterpolation"
+                :color-array="colorArray"
             />
         </div>
 
         <div v-else-if="interactivity === 'tooltip'">
             <h2>Streamgraph with tooltip</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphToolTip :layout="layout" :stackOffset="stackOffset" :origData="origData"/>
+            <StreamGraphToolTip :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
         </div>
 
         <div v-else-if="interactivity === 'infobox'">
             <h2>Streamgraph with infobox</h2>
             <p>Select one of the </p>
-            <StreamGraphInfobox :layout="layout" :stackOffset="stackOffset" :origData="origData"/>
+            <StreamGraphInfobox :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-array="colorArray"/>
         </div>
 
         <div v-else-if="interactivity === 'searchfield'">
             <h2>Streamgraph with search field</h2>
             <p>With the search field you can find a specific year on the timeline</p>
-            <StreamGraphSearchField :layout="layout" :stackOffset="stackOffset" :origData="origData"/>
+            <StreamGraphSearchField :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
         </div>
 
         <div v-else>
             <h2>Streamgraph with bar chart</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="origData"/>
+            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
         </div>
     </div>
 </template>
@@ -62,9 +74,14 @@
 <script>
 import {
     csv as d3Csv,
+    interpolateViridis as d3interpolateViridis,
+    interpolateSpectral as d3InterpolateSpectral,
+    interpolateInferno as d3InterpolateInferno,
+    interpolateCubehelixDefault as d3interpolateCubehelixDefault,
+    schemeTableau10 as d3schemeRdBu,
     stackOffsetSilhouette,
     stackOffsetExpand,
-    stackOffsetNone
+    stackOffsetNone,
 } from "d3";
 
 import StreamGraph from "./molecules/StreamGraph";
@@ -85,16 +102,19 @@ export default {
     data() {
         return {
             origData: [],
-            simpleLayout: {
-                width: 800,
-                height: 400,
-                margin: {top: 0, bottom: 0, left: 0, right: 0},
-            },
             layout: {
                 width: 800,
                 height: 400,
                 margin: {top: 40, bottom: 70, left: 70, right: 40},
             },
+            colorInterpolation: d3interpolateViridis,
+            colorInterpolationOptions: [
+                { text: "viridis", value: d3interpolateViridis },
+                { text: "inferno", value: d3InterpolateInferno },
+                { text: "spectral", value: d3InterpolateSpectral },
+                { text: "cubehelix", value: d3interpolateCubehelixDefault },
+            ],
+            colorArray: d3schemeRdBu,
             interactivity: "barchart",
             interactivityOptions: [ "simple", "infobox", "tooltip", "searchfield", "barchart" ],
             stackOffset: stackOffsetNone,
@@ -107,8 +127,6 @@ export default {
             dataOptions: [
                 {text: "office", value: "/data/office.csv"},
                 {text: "insurance", value: "/data/insurance.csv"},
-                {text: "time", value: "/data/thesisTime.csv"},
-                {text: "family", value: "/data/family.csv"}
             ],
         };
     },
@@ -118,11 +136,6 @@ export default {
                 this.origData = data;
             });
         },
-        async loadTimeStampCSV() {
-            await d3Csv("data/timeStampData.csv").then(data => {
-                this.timeStampData = data;
-            });
-        }
     },
     watch: {
         csvPath() {
@@ -130,11 +143,10 @@ export default {
         },
         interactivity() {
             this.loadCSV();
-        }
+        },
     },
     mounted () {
         this.loadCSV();
-        this.loadTimeStampCSV();
     },
 }
 </script>

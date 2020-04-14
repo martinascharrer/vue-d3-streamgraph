@@ -4,7 +4,7 @@
       <path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2"
             style="stroke:white; stroke-width:1" />
     </pattern>
-    <path :d="d" :fill="fillColor" @click="$emit('clicked')" :class="{active : isActive, 'path-area' : true}"></path>
+    <path :d="d" :fill="fillColor" @click="$emit('clicked')" :class="{ active: isActive, 'path-area': true }"></path>
   </g>
 
 </template>
@@ -33,19 +33,21 @@ export default {
     }
   },
   computed: {
-    d() {
+    area(){
       let scales = this.scales;
-      let area = d3Area()
-        .x(function(d) {
-          return scales.x(d.data.time);
-        })
-        .y0(function(d) {
-          return scales.y(d[0]);
-        })
-        .y1(function(d) {
-          return scales.y(d[1]);
-        });
-        return area(this.data);
+      return d3Area()
+              .x(function(d) {
+                return scales.x(d.data.time);
+              })
+              .y0(function(d) {
+                return scales.y(d[0]);
+              })
+              .y1(function(d) {
+                return scales.y(d[1]);
+              });
+    },
+    d() {
+        return this.area(this.data);
     },
     fillColor() {
       return this.isActive ? 'url(#diagonalHatch)' : this.color;
@@ -56,7 +58,7 @@ export default {
 
 <style scoped>
 .path-area {
-  transition: d 200ms ease;
+  transition: all 200ms ease;
 }
 
 .active {
