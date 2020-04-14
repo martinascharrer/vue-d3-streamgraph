@@ -1,4 +1,4 @@
-import { getOrdinalScale } from "./scales";
+import { scaleOrdinal as d3ScaleOrdinal } from 'd3-scale';
 
 export function getColorArrayByInterpolation(keys, interpolation) {
     let colors = [];
@@ -10,6 +10,6 @@ export function getColorArrayByInterpolation(keys, interpolation) {
 
 export function color(colorArray, colorInterpolation, keys) {
     let colors = colorArray ? colorArray : getColorArrayByInterpolation(keys, colorInterpolation);
-    return getOrdinalScale(keys, colors);
+    return d3ScaleOrdinal().domain(keys).range(colors);
 }
 
