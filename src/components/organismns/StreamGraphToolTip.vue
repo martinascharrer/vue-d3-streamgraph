@@ -10,10 +10,14 @@
     />
     <stream-graph
       :layout="layout"
-      :origData="origData"
-      :stackOffset="stackOffset"
-      :hasSelector="true"
+      :orig-data="origData"
+      :stack-offset="stackOffset"
+      :has-selector="true"
       :has-selector-dots="true"
+      :y-axis-long="true"
+      :x-axis-long="true"
+      :color-array="colorArray"
+      :color-interpolation="colorInterpolation"
       @mousemoved="updateInfoBox"
       @mouseleft="DeactivateInfobox"
     />
@@ -21,15 +25,10 @@
 </template>
 
 <script>
-import {
-  stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis
-} from "d3";
-import { scaleOrdinal as d3ScaleOrdinal } from "d3-scale";
-
 import InfoBox from "../atoms/ToolTip.vue";
 import StreamGraph from "../molecules/StreamGraph";
 
+import { StreamGraphMixin } from "../mixins/StreamGraphMixin";
 
 export default {
   name: "StreamGraphToolTip",
@@ -39,16 +38,21 @@ export default {
       default: () => undefined
     },
     stackOffset: {
-      default: d3StackOffsetSilhouette
+      type: Function,
     },
     layout: {
       type: Object,
       default: () => {}
-    }
+    },
+    colorArray: {
+      type: Array,
+    },
+    colorInterpolation: {
+      type: Function,
+    },
   },
   data: function() {
     return {
-      stackedData: null,
       infobox: {
         title: "title",
         x: 0,
@@ -62,21 +66,7 @@ export default {
     InfoBox,
     StreamGraph,
   },
-  computed: {
-    keys() {
-      return this.origData.columns.slice(1);
-    },
-    color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-              .domain(this.keys)
-              .range(colors);
-    }
-  },
+  mixins: [ StreamGraphMixin ],
   methods: {
     DeactivateInfobox() {
       this.infobox.isVisible = false;

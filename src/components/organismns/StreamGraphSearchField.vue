@@ -5,6 +5,7 @@
             :layout="layout"
             :orig-data="origData"
             :stack-offset="stackOffset"
+            :color-interpolation="colorInterpolation"
     />
     <div class="infobox">
       <input type="number" v-model="searchedYear" @change="searchData"/>
@@ -26,15 +27,9 @@
 </template>
 
 <script>
-import {
-  stackOffsetSilhouette as d3StackOffsetSilhouette,
-  interpolateViridis as d3InterpolateViridis,
-} from "d3";
-import {
-  scaleOrdinal as d3ScaleOrdinal
-} from "d3-scale";
-
 import StreamGraph from "../molecules/StreamGraph";
+
+import {StreamGraphMixin} from "../mixins/StreamGraphMixin";
 
 export default {
   name: "StreamGraphSearchField",
@@ -44,7 +39,7 @@ export default {
       default: () => undefined
     },
     stackOffset: {
-      default: d3StackOffsetSilhouette
+      type: Function,
     },
     layout: {
       type: Object,
@@ -65,21 +60,7 @@ export default {
   components: {
     StreamGraph,
   },
-  computed: {
-    keys() {
-      return this.origData.columns.slice(1);
-    },
-    color() {
-      // create a color for every key in a d3 color-sheme
-      let colors = [];
-      for (let i = 0; i <= this.keys.length; i++) {
-        colors.push(d3InterpolateViridis(i / this.keys.length));
-      }
-      return d3ScaleOrdinal()
-        .domain(this.keys)
-        .range(colors);
-    }
-  },
+  mixins: [ StreamGraphMixin ],
   methods: {
     updateInfobox(data) {
       let columns = this.origData.columns;
