@@ -108,8 +108,4 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
-.stream-graph-bar-chart__item {
-  margin: 1em;
-}
 </style>

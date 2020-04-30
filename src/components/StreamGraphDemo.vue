@@ -1,6 +1,8 @@
 <template>
-    <div>
+    <div id="demoContainer">
         <nav>
+            <h3>Props & data</h3>
+            <p>Play around with different settings, data-sets and interactivity possibilities.</p>
             <label for="selectInteractivity">Interactivity</label>
             <select id="selectInteractivity" v-model="interactivity">
                 <option v-for="option in interactivityOptions" :value="option" :key="option">{{ option }}</option>
@@ -32,41 +34,50 @@
             </select>
         </nav>
 
-        <div v-if="interactivity === 'simple'">
+        <div v-if="interactivity === 'simple'" class="graph">
             <h2>Simple streamgraph</h2>
             <stream-graph
-                :layout="layout"
                 :origData="origData"
+                :layout="layout"
                 :stackOffset="stackOffset"
                 :x-axis-long="true"
-                :has-y-axis="false"
+                :has-y-axis="true"
                 :color-interpolation="colorInterpolation"
                 :color-array="colorArray"
             />
         </div>
 
-        <div v-else-if="interactivity === 'tooltip'">
+        <div v-else-if="interactivity === 'tooltip'" class="graph">
             <h2>Streamgraph with tooltip</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphToolTip :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
+            <StreamGraphToolTip
+                    :layout="layout"
+                    :stackOffset="stackOffset"
+                    :origData="origData"
+                    :color-interpolation="colorInterpolation"
+            />
         </div>
 
-        <div v-else-if="interactivity === 'infobox'">
+        <div v-else-if="interactivity === 'infobox'" class="graph">
             <h2>Streamgraph with infobox</h2>
             <p>Select one of the </p>
-            <StreamGraphInfobox :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-array="colorArray"/>
+            <StreamGraphInfobox
+                    :layout="layout"
+                    :stackOffset="stackOffset"
+                    :origData="origData"
+                    :color-array="colorArray"
+            />
         </div>
 
-        <div v-else-if="interactivity === 'searchfield'">
-            <h2>Streamgraph with search field</h2>
-            <p>With the search field you can find a specific year on the timeline</p>
-            <StreamGraphSearchField :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
-        </div>
-
-        <div v-else>
+        <div v-else class="graph">
             <h2>Streamgraph with bar chart</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
+            <StreamGraphBarChart
+                    :origData="origData"
+                    :layout="layout"
+                    :stackOffset="stackOffset"
+                    :color-interpolation="colorInterpolation"
+            />
         </div>
     </div>
 </template>
@@ -87,7 +98,6 @@ import {
 import StreamGraph from "./molecules/StreamGraph";
 import StreamGraphBarChart from "./organismns/StreamGraphBarChart";
 import StreamGraphInfobox from "./organismns/StreamGraphInfobox";
-import StreamGraphSearchField from "./organismns/StreamGraphSearchField";
 import StreamGraphToolTip from "./organismns/StreamGraphToolTip";
 
 export default {
@@ -96,7 +106,6 @@ export default {
         StreamGraph,
         StreamGraphBarChart,
         StreamGraphInfobox,
-        StreamGraphSearchField,
         StreamGraphToolTip,
     },
     data() {
@@ -105,7 +114,7 @@ export default {
             layout: {
                 width: 800,
                 height: 400,
-                margin: {top: 40, bottom: 70, left: 70, right: 40},
+                margin: {top: 40, bottom: 70, left: 60, right: 40},
             },
             colorInterpolation: d3interpolateViridis,
             colorInterpolationOptions: [
@@ -116,7 +125,7 @@ export default {
             ],
             colorArray: d3schemeRdBu,
             interactivity: "barchart",
-            interactivityOptions: [ "simple", "infobox", "tooltip", "searchfield", "barchart" ],
+            interactivityOptions: [ "simple", "infobox", "tooltip", "barchart" ],
             stackOffset: stackOffsetNone,
             stackOffsetOptions: [
                 {text: "Silhouette", value: stackOffsetSilhouette},
@@ -152,18 +161,36 @@ export default {
 </script>
 
 <style scoped>
-nav {
-    position: sticky;
-    top: 0;
-    width: 100%;
+
+#demoContainer{
     display: flex;
-    justify-content: center;
-    padding: 1em;
+}
+
+nav {
+    width: 15vw;
+    height: 100vh;
+    border-right: 2px solid #e2e2e7;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
     background: white;
+    margin-right: 2em;
+    padding: 2em;
+    font-size: 1em;
+}
+
+label {
+    font-size: 0.9em;
+    margin-top: 1em;
 }
 
 select {
-    padding: 0.2em 1em;
-    margin: 0 1em;
+    padding: 0.5em 1em;
+    margin-top: 0.5em;
+    font-size: 1em;
+}
+
+.graph {
+    padding: 2em;
 }
 </style>

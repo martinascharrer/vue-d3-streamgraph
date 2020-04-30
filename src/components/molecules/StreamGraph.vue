@@ -231,7 +231,6 @@ export default {
 }
 
 .stream-graph {
-  border: 2px solid #e2e2e7;
   display: flex;
   flex-direction: row;
   align-self: center;

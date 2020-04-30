@@ -82,14 +82,3 @@ export const StreamGraphMixin = {
         }
     },
 };
-
-export const StreamGraphPropMixin = {
-    props: {
-        keys() {
-            return this.origData.columns.slice(1);
-        },
-        color() {
-            return color(this.colorArray, this.colorInterpolation, this.keys);
-        }
-    },
-};
