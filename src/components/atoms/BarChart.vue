@@ -1,6 +1,6 @@
 <template>
     <div class="bar-chart">
-        <h2 v-if="title">{{ title }}</h2>
+        <h2 v-if="title" :style="`margin-left:${layout.margin.left}px;`">{{ title }}</h2>
         <svg
             :width="layout.width"
             :height="layout.height"
@@ -14,8 +14,8 @@
             />
             <g
                 v-for="(d, i) in data"
-               :key="d.label"
-               class="bar-chart__line"
+                :key="d.label"
+                class="bar-chart__line"
                 :transform="`translate(${layout.margin.left}, ${layout.margin.top})`"
             >
                 <rect

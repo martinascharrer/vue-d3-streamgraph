@@ -55,7 +55,12 @@ export default {
   padding: 0;
 }
 
+h2 {
+  padding: 0.5em;
+}
+
 li {
+  padding: 0.2em;
   list-style: none;
   text-align: left;
   display: flex;

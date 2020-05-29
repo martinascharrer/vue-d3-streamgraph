@@ -2,7 +2,7 @@
     <div id="demoContainer">
         <nav>
             <h3>Props & data</h3>
-            <p>Play around with different settings, data-sets and interactivity possibilities.</p>
+            <p>Play around with different settings, data-sets and interactivity options.</p>
             <label for="selectInteractivity">Interactivity</label>
             <select id="selectInteractivity" v-model="interactivity">
                 <option v-for="option in interactivityOptions" :value="option" :key="option">{{ option }}</option>
