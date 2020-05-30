@@ -111,10 +111,15 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
   width: 15vw;
   height: auto;
   transition: border 1000ms;
   margin-left: 1em;
+}
+
+.selectedContainer p {
+  padding: 0.5em;
 }
 
 em {

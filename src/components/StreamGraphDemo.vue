@@ -1,6 +1,7 @@
 <template>
     <div>
         <nav>
+            <p>Play around with different settings, data-sets and interactivity options.</p>
             <label for="selectInteractivity">Interactivity</label>
             <select id="selectInteractivity" v-model="interactivity">
                 <option v-for="option in interactivityOptions" :value="option" :key="option">{{ option }}</option>

@@ -78,7 +78,7 @@ export default {
           color: this.color(columns[i])
         });
       }
-      this.barChart.title = "Year: " + data.time;
+      this.barChart.title = data.time;
       this.barChart.max = Math.max(...this.origDataValues);
     },
     resetBarChart() {
