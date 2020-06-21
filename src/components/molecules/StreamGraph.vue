@@ -29,6 +29,7 @@
           v-for="d in stackedData"
           :key="d.key"
           :data="d"
+          :x-key="xKey"
           :layout="layout"
           :scales="{ x:scaleX, y:scaleY }"
           :color="color(d.key)"
@@ -39,6 +40,7 @@
         <path-area
           v-if="isClickable && selected.isVisible"
           :data="selected.data"
+          :x-key="xKey"
           :layout="layout"
           :scales="{ x:scaleX, y:scaleY }"
           :is-active="true"
@@ -46,10 +48,10 @@
         />
       </transition>
       <x-selector
-        v-if="hasSelector && selectorData.isVisible"
-        :data="selectorData.data"
+        v-if="hasSelector && selector.isVisible"
+        :data="selector.data"
         :hasDots="hasSelectorDots"
-        :dotData="selectorData.dotData"
+        :dotData="selector.dotData"
       />
     </svg>
 </template>
@@ -73,7 +75,7 @@ export default {
   data: function() {
     return {
       stackedData: null,
-      selectorData: {
+      selector: {
         isVisible: false,
         data: [],
         dotData: [],
@@ -93,7 +95,7 @@ export default {
   },
   computed: {
     xValues() {
-      return this.origData.map(d => d.time);
+      return this.origData.map(d => d[this.xKey]);
     },
     xMin() {
       return Math.min(...this.xValues);
@@ -135,7 +137,7 @@ export default {
   watch: {
     origData() {
       this.selected.isVisible = false;
-      this.selectorData.isVisible = false;
+      this.selector.isVisible = false;
       this.stackedData =  this.getStackedData();
       this.$emit('initialized');
     },
@@ -151,12 +153,12 @@ export default {
     getStackedData() {
       let stackedData = d3Stack()
         .offset(this.stackOffset)
-        .keys(this.keys)(this.origData);
+        .keys(this.yKeys)(this.origData);
       return stackedData;
     },
     init() {
       this.selected.isVisible = false;
-      this.selectorData.isVisible = false;
+      this.selector.isVisible = false;
       this.stackedData = this.getStackedData();
       this.$emit('initialized');
     },
@@ -165,19 +167,19 @@ export default {
         this.currentClosestPoint = this.getClosestPoint(event.offsetX + 15);
         let closestPointData;
         this.origData.forEach(d => {
-          if (d.time == this.currentClosestPoint.time) closestPointData = d;
+          if (d[this.xKey] == this.currentClosestPoint[this.xKey]) closestPointData = d;
         });
         this.updateSelector();
         this.$emit('mousemoved', closestPointData, event);
       }
     },
     updateSelector() {
-      this.selectorData.isVisible = true;
-      this.selectorData.dotData = [];
+      this.selector.isVisible = true;
+      this.selector.dotData = [];
       if(this.hasSelectorDots) {
-        this.selectorData.dotData = this.getStackedDataByYear(this.currentClosestPoint.time);
+        this.selector.dotData = this.getStackedDataAtXValue(this.currentClosestPoint[this.xKey]);
       }
-      this.selectorData.data = [
+      this.selector.data = [
         { x: this.currentClosestPoint.x, y: this.layout.margin.top },
         { x: this.currentClosestPoint.x, y: this.layout.height - this.layout.margin.bottom },
       ];
@@ -187,19 +189,24 @@ export default {
         .map(data => ({
           x: this.scaleX(data),
           diff: Math.abs(this.scaleX(data) - x),
-          time: data
+          [this.xKey]: data
         }))
         .reduce((memo, val) => (memo.diff < val.diff ? memo : val));
       return value;
     },
-    getStackedDataByYear(year) {
-      year = year - this.stackedData[0][0].data.time;
+    getStackedDataAtXValue(xValue) {
+      // return if the data isn't properly laoded yet
+      if (this.stackedData === null) return;
+
+      // get the index of the given xValue by subtracting the xValue of the first entry
+      let xIndex = xValue - this.stackedData[0][0].data[this.xKey];
+
       let values = [];
       for(let i = 0; i < this.stackedData.length; i++) {
         let key = this.stackedData[i].key;
         values.push({
           name: key,
-          value: this.scaleY(this.stackedData[i][year][1]),
+          value: this.scaleY(this.stackedData[i][xIndex][1]),
           color: this.color(key),
         });
       }

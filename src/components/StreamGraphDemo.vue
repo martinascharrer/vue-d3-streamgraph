@@ -58,16 +58,10 @@
             <StreamGraphInfobox :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-array="colorArray"/>
         </div>
 
-        <div v-else-if="interactivity === 'searchfield'">
-            <h2>Streamgraph with search field</h2>
-            <p>With the search field you can find a specific year on the timeline</p>
-            <StreamGraphSearchField :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
-        </div>
-
         <div v-else>
             <h2>Streamgraph with bar chart</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
+            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="jsonData" :color-interpolation="colorInterpolation"/>
         </div>
     </div>
 </template>
@@ -79,6 +73,7 @@ import {
     interpolateSpectral as d3InterpolateSpectral,
     interpolateInferno as d3InterpolateInferno,
     interpolateCubehelixDefault as d3interpolateCubehelixDefault,
+    json as d3Json,
     schemeTableau10 as d3schemeRdBu,
     stackOffsetSilhouette,
     stackOffsetExpand,
@@ -88,7 +83,6 @@ import {
 import StreamGraph from "./molecules/StreamGraph";
 import StreamGraphBarChart from "./organismns/StreamGraphBarChart";
 import StreamGraphInfobox from "./organismns/StreamGraphInfobox";
-import StreamGraphSearchField from "./organismns/StreamGraphSearchField";
 import StreamGraphToolTip from "./organismns/StreamGraphToolTip";
 
 export default {
@@ -97,12 +91,12 @@ export default {
         StreamGraph,
         StreamGraphBarChart,
         StreamGraphInfobox,
-        StreamGraphSearchField,
         StreamGraphToolTip,
     },
     data() {
         return {
             origData: [],
+            jsonData: [],
             layout: {
                 width: 800,
                 height: 400,
@@ -117,7 +111,7 @@ export default {
             ],
             colorArray: d3schemeRdBu,
             interactivity: "barchart",
-            interactivityOptions: [ "simple", "infobox", "tooltip", "searchfield", "barchart" ],
+            interactivityOptions: [ "simple", "infobox", "tooltip", "barchart" ],
             stackOffset: stackOffsetNone,
             stackOffsetOptions: [
                 {text: "Silhouette", value: stackOffsetSilhouette},
@@ -132,11 +126,12 @@ export default {
         };
     },
     methods: {
-        async loadCSV() {
-            await d3Csv(this.csvPath).then(data => {
-                this.origData = data;
-            });
+       async loadCSV() {
+            this.origData = await d3Csv(this.csvPath);
         },
+        async loadJSON() {
+            this.jsonData = await d3Json('/data/office.json');
+        }
     },
     watch: {
         csvPath() {
@@ -144,10 +139,12 @@ export default {
         },
         interactivity() {
             this.loadCSV();
+            this.loadJSON();
         },
     },
     mounted () {
         this.loadCSV();
+        this.loadJSON();
     },
 }
 </script>

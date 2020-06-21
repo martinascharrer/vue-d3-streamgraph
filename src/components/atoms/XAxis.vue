@@ -3,10 +3,10 @@
     <line v-if="!vertical && hasLines" :x1="layout.margin.left" :y1="height" :x2="width" :y2="height"/>
     <g v-for="(tick) in ticks" :key="tick" :transform="`translate(${scale.x(tick)}, 0)`">
       <line v-if="vertical && hasLines" :y1="layout.margin.top" :y2="height"/>
-      <line v-else-if="hasLines" :y1="height" :y2="height+tickWidth"/>
+      <line v-else-if="hasLines" :y1="height" :y2="height + tickWidth"/>
       <text :style="`transform:translateY(${height+tickWidth + 5}px)`">{{ tick }}</text>
     </g>
-    <line v-if="hasEndLine" :transform="`translate(${scale.x(scale.x.domain()[1])}, 0)`" :y1="layout.margin.top" :y2="height"/>
+    <line v-if="hasEndLine && scale.x() !== undefined" :transform="`translate(${scale.x(scale.x.domain()[1])}, 0)`" :y1="layout.margin.top" :y2="height"/>
   </g>
 </template>
 
@@ -53,7 +53,7 @@ export default {
     ticks() {
       return this.scale.x.ticks(this.nrOfTicks);
     }
-  }
+  },
 };
 </script>
 

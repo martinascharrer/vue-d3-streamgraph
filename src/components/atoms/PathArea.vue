@@ -16,34 +16,38 @@ export default {
   props: {
     data: {
       type: Array,
-      default: () => []
+      default: () => [],
+    },
+    xKey: {
+      type: String,
+      default: 'asdf',
     },
     scales: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
     color: {
       type: String,
-      default: () => "#000000"
+      default: () => "#000000",
     },
     isActive:{
       type:Boolean,
       required:false,
-      default: false
+      default: false,
     }
   },
   computed: {
     area(){
-      let scales = this.scales;
+      let that = this;
       return d3Area()
               .x(function(d) {
-                return scales.x(d.data.time);
+                return that.scales.x(d.data[that.xKey]);
               })
               .y0(function(d) {
-                return scales.y(d[0]);
+                return that.scales.y(d[0]);
               })
               .y1(function(d) {
-                return scales.y(d[1]);
+                return that.scales.y(d[1]);
               });
     },
     d() {

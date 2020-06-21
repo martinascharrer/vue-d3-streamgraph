@@ -74,22 +74,16 @@ export const StreamGraphMixin = {
         },
     },
     computed: {
-        keys() {
-            return this.origData.columns.slice(1);
+        yKeys() {
+            if(this.origData.columns !== undefined) return this.origData.columns.slice(1);
+            return Object.keys(this.origData[0]).slice(1);
+        },
+        xKey() {
+            if(this.origData.columns !== undefined) return this.origData.columns[0];
+            return Object.keys(this.origData[0])[0];
         },
         color() {
-            return color(this.colorArray, this.colorInterpolation, this.keys);
-        }
-    },
-};
-
-export const StreamGraphPropMixin = {
-    props: {
-        keys() {
-            return this.origData.columns.slice(1);
-        },
-        color() {
-            return color(this.colorArray, this.colorInterpolation, this.keys);
+            return color(this.colorArray, this.colorInterpolation, this.yKeys);
         }
     },
 };
