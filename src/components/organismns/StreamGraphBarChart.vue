@@ -59,8 +59,8 @@ export default {
     origDataValues() {
       let values = [];
       for (let i = 0; i < this.origData.length; i++) {
-        for (let j = 0; j < this.keys.length; j++) {
-          let key = this.keys[j];
+        for (let j = 0; j < this.yKeys.length; j++) {
+          let key = this.yKeys[j];
           values.push(this.origData[i][key]);
         }
       }
@@ -70,7 +70,7 @@ export default {
   methods: {
     updateBarChartData(data) {
       this.barChart.entries = [];
-      let columns = this.origData.columns;
+      const columns = this.origData.columns !== undefined ? this.origData.columns : Object.keys(this.origData[0]);
       for (let i = 1; i < columns.length; i++) {
         this.barChart.entries.push({
           label: columns[i],
@@ -78,17 +78,17 @@ export default {
           color: this.color(columns[i])
         });
       }
-      this.barChart.title = data.time;
+      this.barChart.title = data[this.xKey].toString();
       this.barChart.max = Math.max(...this.origDataValues);
     },
     resetBarChart() {
       this.barChart = {
         title: "",
-                entries: [],
-                layout: {
+        entries: [],
+        layout: {
           width: 400,
-                  height: 250,
-                  margin: { top: 20, bottom: 40, left: 40, right: 40 }
+          height: 250,
+          margin: { top: 20, bottom: 40, left: 40, right: 40 }
         },
       };
     },

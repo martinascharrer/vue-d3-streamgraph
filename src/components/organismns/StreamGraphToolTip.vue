@@ -86,7 +86,7 @@ export default {
         });
       }
       this.infobox = {
-        title: data.time,
+        title: data[this.xKey],
         text: "Total: " + total,
         entries: entries,
         x: event.pageX + 30,
