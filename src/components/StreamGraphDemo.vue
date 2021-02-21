@@ -1,39 +1,52 @@
 <template>
     <div>
         <nav>
-            <p>Play around with different settings, data-sets and interactivity options.</p>
             <label for="selectInteractivity">Interactivity</label>
             <select id="selectInteractivity" v-model="interactivity">
-                <option v-for="option in interactivityOptions" :value="option" :key="option">{{ option }}</option>
+                <option
+                    v-for="option in interactivityOptions"
+                    :value="option"
+                    :key="option"
+                >
+                    {{ option }}
+                </option>
             </select>
 
             <label for="selectStackOffset">StackOffset</label>
             <select id="selectStackOffset" v-model="stackOffset">
-                <option v-for="option in stackOffsetOptions" :value="option.value" :key="option.text">{{ option.text }}</option>
+                <option
+                    v-for="option in stackOffsetOptions"
+                    :value="option.value"
+                    :key="option.text"
+                >
+                    {{ option.text }}
+                </option>
             </select>
 
             <label for="selectData">Data</label>
             <select id="selectData" v-model="csvPath">
                 <option
-                        v-for="option in dataOptions"
-                        :value="option.value"
-                        :key="option.text"
-                >{{ option.text }}
+                    v-for="option in dataOptions"
+                    :value="option.value"
+                    :key="option.text"
+                >
+                    {{ option.text }}
                 </option>
             </select>
 
             <label for="colorInterpolation">color</label>
             <select id="colorInterpolation" v-model="colorInterpolation">
                 <option
-                        v-for="option in colorInterpolationOptions"
-                        :value="option.value"
-                        :key="option.text"
-                >{{ option.text }}
+                    v-for="option in colorInterpolationOptions"
+                    :value="option.value"
+                    :key="option.text"
+                >
+                    {{ option.text }}
                 </option>
             </select>
         </nav>
 
-        <div v-if="interactivity === 'simple'">
+        <section v-if="interactivity === 'simple'">
             <h2>Simple streamgraph</h2>
             <stream-graph
                 :layout="layout"
@@ -44,25 +57,40 @@
                 :color-interpolation="colorInterpolation"
                 :color-array="colorArray"
             />
-        </div>
+        </section>
 
-        <div v-else-if="interactivity === 'tooltip'">
+        <section v-else-if="interactivity === 'tooltip'">
             <h2>Streamgraph with tooltip</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphToolTip :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-interpolation="colorInterpolation"/>
-        </div>
+            <StreamGraphToolTip
+                :layout="layout"
+                :stackOffset="stackOffset"
+                :origData="origData"
+                :color-interpolation="colorInterpolation"
+            />
+        </section>
 
-        <div v-else-if="interactivity === 'infobox'">
+        <section v-else-if="interactivity === 'infobox'">
             <h2>Streamgraph with infobox</h2>
             <p>Select one of the </p>
-            <StreamGraphInfobox :layout="layout" :stackOffset="stackOffset" :origData="origData" :color-array="colorArray"/>
-        </div>
+            <StreamGraphInfobox
+                :layout="layout"
+                :stackOffset="stackOffset"
+                :origData="origData"
+                :color-array="colorArray"
+            />
+        </section>
 
-        <div v-else>
+        <section v-else>
             <h2>Streamgraph with bar chart</h2>
             <p>Hover over the graph for more information.</p>
-            <StreamGraphBarChart :layout="layout" :stackOffset="stackOffset" :origData="jsonData" :color-interpolation="colorInterpolation"/>
-        </div>
+            <StreamGraphBarChart
+                :layout="layout"
+                :stackOffset="stackOffset"
+                :origData="jsonData"
+                :color-interpolation="colorInterpolation"
+            />
+        </section>
     </div>
 </template>
 
@@ -78,15 +106,15 @@ import {
     stackOffsetSilhouette,
     stackOffsetExpand,
     stackOffsetNone,
-} from "d3";
+} from 'd3';
 
-import StreamGraph from "./molecules/StreamGraph";
-import StreamGraphBarChart from "./organismns/StreamGraphBarChart";
-import StreamGraphInfobox from "./organismns/StreamGraphInfobox";
-import StreamGraphToolTip from "./organismns/StreamGraphToolTip";
+import StreamGraph from './molecules/StreamGraph';
+import StreamGraphBarChart from './organismns/StreamGraphBarChart';
+import StreamGraphInfobox from './organismns/StreamGraphInfobox';
+import StreamGraphToolTip from './organismns/StreamGraphToolTip';
 
 export default {
-    name: "StreamGraphDemo",
+    name: 'StreamGraphDemo',
     components: {
         StreamGraph,
         StreamGraphBarChart,
@@ -100,33 +128,38 @@ export default {
             layout: {
                 width: 800,
                 height: 400,
-                margin: {top: 40, bottom: 70, left: 70, right: 40},
+                margin: {
+                    top: 40,
+                    bottom: 70,
+                    left: 70,
+                    right: 40
+                },
             },
             colorInterpolation: d3interpolateViridis,
             colorInterpolationOptions: [
-                { text: "viridis", value: d3interpolateViridis },
-                { text: "inferno", value: d3InterpolateInferno },
-                { text: "spectral", value: d3InterpolateSpectral },
-                { text: "cubehelix", value: d3interpolateCubehelixDefault },
+                {text: 'viridis', value: d3interpolateViridis},
+                {text: 'inferno', value: d3InterpolateInferno},
+                {text: 'spectral', value: d3InterpolateSpectral},
+                {text: 'cubehelix', value: d3interpolateCubehelixDefault},
             ],
             colorArray: d3schemeRdBu,
-            interactivity: "barchart",
-            interactivityOptions: [ "simple", "infobox", "tooltip", "barchart" ],
+            interactivity: 'barchart',
+            interactivityOptions: ['simple', 'infobox', 'tooltip', 'barchart'],
             stackOffset: stackOffsetNone,
             stackOffsetOptions: [
-                {text: "Silhouette", value: stackOffsetSilhouette},
-                {text: "Baseline", value: stackOffsetNone},
-                {text: "Expand", value: stackOffsetExpand}
+                {text: 'Silhouette', value: stackOffsetSilhouette},
+                {text: 'Baseline', value: stackOffsetNone},
+                {text: 'Expand', value: stackOffsetExpand}
             ],
-            csvPath: "/data/office.csv",
+            csvPath: '/data/office.csv',
             dataOptions: [
-                {text: "office", value: "/data/office.csv"},
-                {text: "insurance", value: "/data/insurance.csv"},
+                {text: 'office', value: '/data/office.csv'},
+                {text: 'insurance', value: '/data/insurance.csv'},
             ],
         };
     },
     methods: {
-       async loadCSV() {
+        async loadCSV() {
             this.origData = await d3Csv(this.csvPath);
         },
         async loadJSON() {
@@ -142,11 +175,11 @@ export default {
             this.loadJSON();
         },
     },
-    mounted () {
+    mounted() {
         this.loadCSV();
         this.loadJSON();
     },
-}
+};
 </script>
 
 <style scoped>
@@ -158,6 +191,12 @@ nav {
     justify-content: center;
     padding: 1em;
     background: white;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 select {

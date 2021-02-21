@@ -1,6 +1,6 @@
 <template>
-  <div class="stream-graph-bar-chart">
-    <StreamGraph
+    <div class="stream-graph-bar-chart">
+        <StreamGraph
             class="stream-graph-bar-chart__item"
             :layout="layout"
             :orig-data="origData"
@@ -15,8 +15,8 @@
             @mousemoved="updateBarChartData"
             @initialized="resetBarChart"
             @colorchange="resetColors"
-    />
-    <bar-chart
+        />
+        <BarChart
             class="stream-graph-bar-chart__item"
             :data="barChart.entries"
             :title="barChart.title"
@@ -24,92 +24,97 @@
             :bar-width="10"
             :max="barChart.max"
             :nr-of-ticks="7"
-    />
-  </div>
+        />
+    </div>
 </template>
 
 <script>
-import BarChart from "../atoms/BarChart";
-import StreamGraph from "../molecules/StreamGraph";
+import BarChart from '../atoms/BarChart';
+import StreamGraph from '../molecules/StreamGraph';
 
-import {StreamGraphMixin} from "../mixins/StreamGraphMixin";
+import { StreamGraphMixin } from '../mixins/StreamGraphMixin';
 
 export default {
-  name: "StreamGraphBarChart",
-  data: function() {
-    return {
-      searchedYear: 0,
-      barChart: {
-        title: "",
-        entries: [],
-        layout: {
-          width: 400,
-          height: 250,
-          margin: { top: 20, bottom: 40, left: 40, right: 40 }
-        },
-      },
-    };
-  },
-  components: {
-    BarChart,
-    StreamGraph,
-  },
-  mixins: [ StreamGraphMixin ],
-  computed: {
-    origDataValues() {
-      let values = [];
-      for (let i = 0; i < this.origData.length; i++) {
-        for (let j = 0; j < this.yKeys.length; j++) {
-          let key = this.yKeys[j];
-          values.push(this.origData[i][key]);
+    name: 'StreamGraphBarChart',
+    data: function () {
+        return {
+            searchedYear: 0,
+            barChart: {
+                title: '',
+                entries: [],
+                layout: {
+                    width: 400,
+                    height: 250,
+                    margin: {
+                        top: 20,
+                        bottom: 40,
+                        left: 40,
+                        right: 40,
+                    },
+                },
+            },
+        };
+    },
+    components: {
+        BarChart,
+        StreamGraph,
+    },
+    mixins: [StreamGraphMixin],
+    computed: {
+        origDataValues() {
+            let values = [];
+            for (let i = 0; i < this.origData.length; i++) {
+                for (let j = 0; j < this.yKeys.length; j++) {
+                    let key = this.yKeys[j];
+                    values.push(this.origData[i][key]);
+                }
+            }
+            return values;
         }
-      }
-      return values;
-    }
-  },
-  methods: {
-    updateBarChartData(data) {
-      this.barChart.entries = [];
-      const columns = this.origData.columns !== undefined ? this.origData.columns : Object.keys(this.origData[0]);
-      for (let i = 1; i < columns.length; i++) {
-        this.barChart.entries.push({
-          label: columns[i],
-          value: data[columns[i]],
-          color: this.color(columns[i])
-        });
-      }
-      this.barChart.title = data[this.xKey].toString();
-      this.barChart.max = Math.max(...this.origDataValues);
     },
-    resetBarChart() {
-      this.barChart = {
-        title: "",
-        entries: [],
-        layout: {
-          width: 400,
-          height: 250,
-          margin: { top: 20, bottom: 40, left: 40, right: 40 }
+    methods: {
+        updateBarChartData(data) {
+            this.barChart.entries = [];
+            const columns = this.origData.columns !== undefined ? this.origData.columns : Object.keys(this.origData[0]);
+            for (let i = 1; i < columns.length; i++) {
+                this.barChart.entries.push({
+                    label: columns[i],
+                    value: data[columns[i]],
+                    color: this.color(columns[i])
+                });
+            }
+            this.barChart.title = data[this.xKey].toString();
+            this.barChart.max = Math.max(...this.origDataValues);
         },
-      };
+        resetBarChart() {
+            this.barChart = {
+                title: '',
+                entries: [],
+                layout: {
+                    width: 400,
+                    height: 250,
+                    margin: {top: 20, bottom: 40, left: 40, right: 40}
+                },
+            };
+        },
+        resetColors() {
+            for (let i = 0; i < this.barChart.entries.length; i++) {
+                this.barChart.entries[i].color = this.color(this.barChart.entries[i].label);
+            }
+        },
     },
-    resetColors() {
-      for (let i = 0; i < this.barChart.entries.length; i++) {
-        this.barChart.entries[i].color = this.color(this.barChart.entries[i].label);
-      }
-    },
-  },
 };
 </script>
 
 <style scoped>
 .stream-graph-bar-chart {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 .stream-graph-bar-chart__item {
-  margin: 1em;
+    margin: 1em;
 }
 </style>

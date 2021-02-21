@@ -42,10 +42,10 @@
 <script>
 import { scaleLinear as d3ScaleLinear } from 'd3-scale';
 
-import XAxis from "./XAxis";
+import XAxis from './XAxis';
 
 export default {
-    name: "BarChart",
+    name: 'BarChart',
     props: {
         title: {
             type: String,
@@ -80,7 +80,7 @@ export default {
         }
     },
     components: {
-      XAxis,
+        XAxis,
     },
     computed: {
         barOffset() {
@@ -91,8 +91,8 @@ export default {
         },
         scaleX() {
             return d3ScaleLinear()
-                .domain([ this.min, this.max ])
-                .range([ this.layout.margin.left, this.layout.width - this.layout.margin.right ]);
+                .domain([this.min, this.max])
+                .range([this.layout.margin.left, this.layout.width - this.layout.margin.right]);
         },
     },
     methods: {
@@ -100,7 +100,7 @@ export default {
             return this.scaleX(value) - this.layout.margin.left;
         }
     }
-}
+};
 </script>
 
 <style scoped>

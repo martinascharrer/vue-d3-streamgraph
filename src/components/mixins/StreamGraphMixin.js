@@ -1,8 +1,8 @@
-import {color} from "../../utils/colors";
+import { color } from '../../utils/colors';
 import {
     stackOffsetSilhouette as d3StackOffsetSilhouette,
     interpolateViridis as d3interpolateViridis,
-} from "d3";
+} from 'd3';
 
 export const StreamGraphMixin = {
     props: {
@@ -75,11 +75,11 @@ export const StreamGraphMixin = {
     },
     computed: {
         yKeys() {
-            if(this.origData.columns !== undefined) return this.origData.columns.slice(1);
+            if (this.origData.columns !== undefined) return this.origData.columns.slice(1);
             return Object.keys(this.origData[0]).slice(1);
         },
         xKey() {
-            if(this.origData.columns !== undefined) return this.origData.columns[0];
+            if (this.origData.columns !== undefined) return this.origData.columns[0];
             return Object.keys(this.origData[0])[0];
         },
         color() {

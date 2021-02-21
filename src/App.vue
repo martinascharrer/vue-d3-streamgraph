@@ -1,13 +1,14 @@
 <template>
     <div id="app">
-        <StreamGraphDemo />
+        <StreamGraphDemo/>
     </div>
 </template>
 
 <script>
-import StreamGraphDemo from "./components/StreamGraphDemo";
+import StreamGraphDemo from './components/StreamGraphDemo';
+
 export default {
-    name: "app",
+    name: 'app',
     components: {
         StreamGraphDemo,
     }
